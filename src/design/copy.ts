@@ -1,0 +1,36 @@
+export const copy = {
+  home: {
+    headline: 'See who is available',
+    subline: 'See who’s around, then keep it easy.',
+    freeAction: 'I’m free',
+    freeActionHint: 'Show your friends you have time.',
+    freeState: {
+      available: 'You’re available',
+      online: 'You’re online',
+      changeAction: 'Change availability',
+    },
+    friendsAvailable: 'Friends who are free',
+    friendsEmpty: 'None of your friends are currently online.',
+    available: 'Available now',
+    rooms: 'Active Rooms',
+    quietTitle: 'Pretty quiet right now.',
+    quietCopy: 'You could change that.',
+  },
+  room: { joined: 'You’re in', join: 'Yeb!', later: 'Yeb, but later', chat: 'Temporary Chat', people: 'People' },
+  activity: {
+    title: 'Activity',
+    intro: 'The little updates that help plans happen.',
+    fresh: 'Fresh signal',
+    earlier: 'Earlier signals',
+    emptyTitle: 'Nothing new yet.',
+    emptyCopy: 'When someone opens something or shares free time, it’ll show up here.',
+    openRoom: 'Open room',
+    seeRooms: 'See Rooms',
+  },
+  availability: { title: 'How long are you around?', note: 'Up for anything.' },
+  friends: {
+    emptyTitle: 'Invite your friends',
+    emptyCopy: 'Share your link and make the first spark.',
+    emptyAction: 'Show my link',
+  },
+} as const;

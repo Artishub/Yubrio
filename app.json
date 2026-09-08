@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Yubrio",
+    "slug": "yubrio",
+    "scheme": "yubrio",
+    "extra": { "deepLinkDomains": ["yubrio.com", "yubr.io"] },
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      "expo-updates",
+      "expo-notifications",
+      ["expo-camera", { "cameraPermission": "Allow Yubrio to use your camera to add friends." }],
+      "expo-asset",
+      "expo-font"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yubrio.app"
+    },
+    "android": {
+      "package": "com.yubrio.app"
+    }
+  }
+}

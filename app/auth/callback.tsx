@@ -1,0 +1,10 @@
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase/client';
+import { colors, type } from '@/design/tokens';
+import { YText } from '@/components/ui';
+
+export default function AuthCallback() { const router = useRouter(); const params = useLocalSearchParams<{ code?: string; access_token?: string; refresh_token?: string; error?: string; error_description?: string }>(); const [error, setError] = useState<string | null>(null); useEffect(() => { let active = true; const finish = async () => { try { if (params.error) throw new Error(params.error_description || params.error); if (params.code) { const result = await supabase.auth.exchangeCodeForSession(params.code); if (result.error) throw result.error; } else if (params.access_token && params.refresh_token) { const result = await supabase.auth.setSession({ access_token: params.access_token, refresh_token: params.refresh_token }); if (result.error) throw result.error; } else { throw new Error('Missing sign-in code.'); } if (active) router.replace('/'); } catch { if (active) setError('This sign-in link could not be completed. Request a new one.'); } }; void finish(); return () => { active = false; }; }, [params.code, params.access_token, params.refresh_token, params.error, params.error_description, router]); if (error) return <View style={styles.root}><YText style={type.section}>Couldn’t finish signing in.</YText><YText style={styles.error}>{error}</YText><Pressable accessibilityRole="button" onPress={() => router.replace('/')}><YText style={styles.back}>Back to Yubrio</YText></Pressable></View>; return <View style={styles.root}><ActivityIndicator color={colors.brand} /></View>; }
+
+const styles = { root: { flex: 1, backgroundColor: colors.canvas, alignItems: 'center' as const, justifyContent: 'center' as const, padding: 24 }, error: { color: colors.muted, textAlign: 'center' as const, marginTop: 10, marginBottom: 18 }, back: { color: colors.brand, fontWeight: '800' as const } };
