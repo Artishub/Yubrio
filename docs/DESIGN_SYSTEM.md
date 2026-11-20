@@ -34,7 +34,7 @@
 ## Interaction rules
 
 - Buttons compress slightly on press; primary actions receive light haptics.
-- Yeb uses medium/light haptic, a short spring, label change, and participant entrance.
+- Yeb uses medium/light haptic, a short spring, label change, and participant entrance. Joining or opening a room also plays `YebBurst`: one ring and a few activity-colored sparks, under 500ms, skipped with reduced motion.
 - Room creation uses a success haptic and visible insertion into Home.
 - Keep the canvas visually quiet until a live signal, room, or response creates a reason for color and motion.
 - Use spatial grouping and horizontal room moments to break list rhythm; avoid stacking several rounded rectangles with identical weight.

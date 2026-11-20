@@ -4,7 +4,7 @@
 
 ## Publish
 
-Choose duration: 1h, 3h, 6h, Today, or Custom (maximum 24h). Choose audience: Everyone, Circle(s), or Specific friends. Add an optional note such as “Up for anything.” Message permission is on by default.
+Choose when: starting now with a duration (1h, 3h, 6h, Today, or Custom, maximum 24h), or a time window from one clock time to another (for example 09:00–17:00). A window that has not started yet is shown to friends as “Free 09:00–17:00” without the live status dot; once it starts it behaves like any other availability. Time windows currently work in demo mode only; the Supabase path stores the end time alone. Choose audience: Everyone, Circle(s), or Specific friends. Add an optional note such as “Up for anything.” Message permission is on by default.
 
 ## Visibility and expiry
 

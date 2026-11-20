@@ -10,7 +10,7 @@ Progressive steps: What (preset/custom), When (start + duration, max 24h), Where
 
 Show activity icon/title, scheduled time or remaining time, location/connection, People, and Chat if enabled. Primary state is “Yeb!”; joined state is “You’re in.” Creator appears as “Created room”, not host/admin/owner.
 
-Gaming stays an activity type. For online gaming rooms, creation can optionally capture a game, mode, and flexible join details such as a username, Discord, server, or link. These are displayed as compact connection details rather than creating permanent game communities.
+Gaming stays an activity type. For online gaming rooms, creation can optionally capture a game, mode, and flexible join details such as a username, Discord, server, or link. These are displayed as compact connection details rather than creating permanent game communities. A link in the details gets an Open button once the viewer has joined. A gaming room without a name is titled after its game.
 
 ## Joining later
 

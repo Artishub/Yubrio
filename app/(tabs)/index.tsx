@@ -32,7 +32,8 @@ export default function HomeScreen() {
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(timer); }, []);
   const liveAvailability = useMemo(() => availability.filter((item) => !item.expiresAt || item.expiresAt > now).map((item) => ({ ...item, upcoming: isAvailabilityUpcoming(item.startsAt, now), expiresIn: item.expiresAt ? formatAvailabilityTime(item.expiresAt, item.startsAt, now) : item.expiresIn })), [availability, now]);
   const visibleAvailability = useMemo(() => liveAvailability.filter((item) => item.personId !== me.id).sort((a, b) => Number(a.upcoming) - Number(b.upcoming)), [liveAvailability, me.id]);
-  const roomCardWidth = Math.min(Math.max(width - spacing.xl * 2, 280), 380);
+  const roomPeek = rooms.length > 1 ? spacing.xxxl : 0;
+  const roomCardWidth = Math.min(Math.max(width - spacing.xl * 2 - roomPeek, 260), 380);
   const openRoom = (roomId: string) => router.push({ pathname: '/room/[id]', params: { id: roomId } });
   const joinRoomFromHome = async (roomId: string) => {
     setActionError('');
