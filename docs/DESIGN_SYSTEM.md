@@ -40,6 +40,7 @@
 - Keep the home list short and scannable; let the activity icon and color distinguish rows.
 - The free friends row scrolls horizontally; never make swiping the only way to reach a core action.
 - Use blur/material behind floating controls and live surfaces when supported; keep a coherent opaque fallback for web and older platforms. Prefer one material treatment per visual group and preserve readable contrast.
+- A room row can be dragged right to Yeb: it reveals the Yeb mark, catches with a haptic tick at the join point and springs back. The Yeb button stays, so the gesture is never the only way. A room that is running has a thin border and soft glow in its activity color.
 - Home blocks use `StretchOnScroll`: while a block crosses the top edge or the tab bar it stretches in the scroll direction, blurs, dims and fades, tied directly to the finger. Amounts live in `motion.stretch`. It is off with reduced motion.
 - Motion is 100–180ms for feedback, 200–350ms for transitions, 300–500ms for celebration. Respect reduced motion.
 

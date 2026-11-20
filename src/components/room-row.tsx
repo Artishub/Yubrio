@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { FadeInDown, runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { ActivityIcon, Avatar, YText } from '@/components/ui';
 import { YebBurst } from '@/components/yeb-burst';
 import { Colors, radius, spacing } from '@/design/tokens';
@@ -11,7 +12,12 @@ import { copy } from '@/design/copy';
 import { Person, Room } from '@/types';
 import { displayTitle } from '@/utils/display-name';
 
+// How far a row must be dragged right to count as Yeb, and how far it can travel.
+const swipeYebAt = 72;
+const swipeMax = 104;
+
 // One room in the home list: what, when, where, who is in, and a Yeb button.
+// Dragging the row to the right is a second way to Yeb; the button always stays.
 export function RoomRow({ room, people, onOpen, onYeb }: { room: Room; people: Person[]; onOpen: () => void; onYeb: () => void }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -21,10 +27,38 @@ export function RoomRow({ room, people, onOpen, onYeb }: { room: Room; people: P
   const [now, setNow] = useState(Date.now);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(timer); }, []);
   const happening = (room.startsAt ?? 0) <= now && now <= room.endAt;
+  const dragX = useSharedValue(0);
+  const armed = useSharedValue(false);
+  // A drag must not also count as a tap on the row when the finger lifts.
+  const justSwiped = useSharedValue(0);
+  const tick = () => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); };
+  const swipe = Gesture.Pan()
+    .enabled(!room.joined)
+    .activeOffsetX(12)
+    .failOffsetX(-12)
+    .failOffsetY([-12, 12])
+    .onUpdate((event) => {
+      // Past the Yeb point the row resists, so it feels like it catches.
+      const pull = Math.max(0, event.translationX);
+      dragX.value = pull <= swipeYebAt ? pull : Math.min(swipeMax, swipeYebAt + (pull - swipeYebAt) * 0.3);
+      const nowArmed = pull >= swipeYebAt;
+      if (nowArmed !== armed.value) { armed.value = nowArmed; if (nowArmed) runOnJS(tick)(); }
+    })
+    .onEnd(() => {
+      justSwiped.value = 1;
+      justSwiped.value = withDelay(400, withTiming(0, { duration: 0 }));
+      if (armed.value) runOnJS(onYeb)();
+      armed.value = false;
+      dragX.value = withSpring(0, { damping: 18, stiffness: 220 });
+    });
+  const cardStyle = useAnimatedStyle(() => ({ transform: [{ translateX: dragX.value }] }));
+  const revealStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, dragX.value / swipeYebAt) }));
   const countLabel = room.count === 1 ? copy.home.onePersonIn : `${room.count} ${copy.home.peopleIn}`;
 
-  return <Animated.View entering={reducedMotion ? undefined : FadeInDown.springify()} style={styles.card}>
-    <Pressable accessibilityRole="button" accessibilityLabel={`Open ${title}`} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onOpen(); }} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
+  return <Animated.View entering={reducedMotion ? undefined : FadeInDown.springify()} style={styles.track}>
+    <Animated.View accessible={false} style={[styles.reveal, revealStyle]}><Ionicons name="flash" size={18} color={colors.brandInk} /><YText style={styles.yebText}>{copy.room.join}</YText></Animated.View>
+    <GestureDetector gesture={swipe}><Animated.View style={[styles.card, happening && { borderColor: `${meta.color}66`, boxShadow: `0px 0px 18px ${meta.color}33` }, cardStyle]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`Open ${title}`} onPress={() => { if (justSwiped.value > 0) return; if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onOpen(); }} style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
       <ActivityIcon activity={room.activity} size={46} />
       <View style={styles.copy}>
         <YText style={styles.title} numberOfLines={2}>{title}</YText>
@@ -50,10 +84,13 @@ export function RoomRow({ room, people, onOpen, onYeb }: { room: Room; people: P
         </Pressable>}
       <YebBurst active={Boolean(room.joined)} />
     </View>
+    </Animated.View></GestureDetector>
   </Animated.View>;
 }
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
+  track: { borderRadius: radius.card },
+  reveal: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, paddingLeft: spacing.lg, borderRadius: radius.card, backgroundColor: colors.brand, flexDirection: 'row', alignItems: 'center', gap: 5 },
   card: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: radius.card, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
   main: { flex: 1, flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   pressed: { opacity: 0.7 },
