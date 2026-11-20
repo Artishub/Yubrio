@@ -66,7 +66,7 @@ export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjo
     onCreate({
       id: `room-${Date.now()}`,
       activity,
-      title: title.trim() || meta.label,
+      title: title.trim() || (where === 'Online' && gameTitle.trim()) || meta.label,
       detail: where === 'Online' ? 'Online · Join after Yeb' : undefined,
       time: formatRoomTime(start, end),
       startsAt: start.getTime(),

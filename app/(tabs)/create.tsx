@@ -18,7 +18,7 @@ export default function CreateRoomScreen() {
       people={people}
       onClose={() => router.replace('/(tabs)')}
       onCreate={(room) => {
-        void addRoom(room).then((roomId) => router.replace({ pathname: '/room/[id]', params: { id: roomId } })).catch(() => router.replace('/(tabs)'));
+        void addRoom(room).then((roomId) => router.replace({ pathname: '/room/[id]', params: { id: roomId, fresh: '1' } })).catch(() => router.replace('/(tabs)'));
       }}
     />
   </View>;

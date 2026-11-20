@@ -33,6 +33,7 @@ export const colors = {
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32, huge: 40 };
 export const radius = { card: 20, sheet: 30, button: 14, icon: 14, chip: 999 };
+export const motion = { celebration: 480 };
 export const shadow = {
   card: { boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.3)', elevation: 3 },
 };

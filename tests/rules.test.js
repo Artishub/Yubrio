@@ -112,3 +112,10 @@ test('availability time shows the window until it starts, then time left', () =>
   assert.match(formatAvailabilityTime(now + 3 * hour, now + hour, now), /–/);
   assert.equal(formatAvailabilityTime(now + 3 * hour, now - hour, now), '3h left');
 });
+
+test('findLink pulls an openable link out of join details', () => {
+  const { findLink } = require('../.test-build/rules.js');
+  assert.equal(findLink('League · ARAM · discord.gg/abc123'), 'https://discord.gg/abc123');
+  assert.equal(findLink('Join at https://example.com/room.'), 'https://example.com/room');
+  assert.equal(findLink('Username: artjom#1234'), null);
+});

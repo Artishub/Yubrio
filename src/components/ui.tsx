@@ -9,6 +9,7 @@ import { activityMeta, colors, radius, shadow, spacing, type, ActivityType } fro
 import { Person, Room } from '@/types';
 import { copy } from '@/design/copy';
 import { displayName, displayTitle } from '@/utils/display-name';
+import { YebBurst } from '@/components/yeb-burst';
 
 export function YText({ style, ...props }: TextProps) { return <Text {...props} style={[styles.text, style]} />; }
 export function Screen({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) { return <View style={[styles.screen, style]}>{children}</View>; }
@@ -45,7 +46,7 @@ export function RoomMomentCard({ room, people, onOpen, onYeb }: { room: Room; pe
       </View>
       <View style={styles.roomMomentFooter}><View style={styles.roomPeople}>{people.slice(0, 3).map((person, index) => <Animated.View key={person.id} entering={reducedMotion ? undefined : FadeInRight.delay(index * 55).duration(220)}><Avatar person={person} size={27} /></Animated.View>)}<View style={styles.roomMomentPeopleCopy}><YText style={styles.roomMomentPeopleNames} numberOfLines={1}>{peopleNames || 'Be the first in'}</YText><YText style={styles.roomMomentPeople}>{peopleLabel}</YText></View></View><YText style={[styles.roomMomentLocation, { color: meta.color }]} numberOfLines={1}>{room.location ?? (room.online ? 'Online' : 'Undecided')}</YText></View>
     </Pressable>
-    {(onYeb || room.joined) && <View style={styles.roomMomentActionOverlay}>{onYeb ? <MiniYebButton onPress={onYeb} title={displayTitle(room.title)} /> : <View accessible accessibilityLabel="You’re in" style={styles.miniYebJoined}><Ionicons name="checkmark" size={14} color={colors.brand} /><YText style={[styles.miniYebText, styles.miniYebJoinedText]}>You’re in</YText></View>}</View>}
+    {(onYeb || room.joined) && <View style={styles.roomMomentActionOverlay}>{onYeb ? <MiniYebButton onPress={onYeb} title={displayTitle(room.title)} /> : <View accessible accessibilityLabel="You’re in" style={styles.miniYebJoined}><Ionicons name="checkmark" size={14} color={colors.brand} /><YText style={[styles.miniYebText, styles.miniYebJoinedText]}>You’re in</YText></View>}<YebBurst active={Boolean(room.joined)} /></View>}
   </Animated.View>;
 }
 

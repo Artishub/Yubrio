@@ -22,7 +22,7 @@ export const circles: Circle[] = [
 
 export const rooms: Room[] = [
   { id: 'drinks', activity: 'drinks', title: 'Drinks after work', time: 'Today · 17:00–22:00', startsAt: demoNow - 1000 * 60 * 60, endAt: demoNow + 1000 * 60 * 60 * 3, people: ['max', 'lisa'], count: 2, location: 'Ludwigstraße · Gießen', creatorId: 'max', chatEnabled: true, participantsCanInvite: true },
-  { id: 'league', activity: 'gaming', title: 'League tonight', detail: 'ARAM · Discord', time: 'Today · 20:00–23:00', startsAt: demoNow + 1000 * 60 * 60, endAt: demoNow + 1000 * 60 * 60 * 6, people: ['jonas'], count: 1, online: 'League of Legends', creatorId: 'jonas', chatEnabled: true, participantsCanInvite: true },
+  { id: 'league', activity: 'gaming', title: 'League tonight', detail: 'ARAM · Discord', time: 'Today · 20:00–23:00', startsAt: demoNow + 1000 * 60 * 60, endAt: demoNow + 1000 * 60 * 60 * 6, people: ['jonas'], count: 1, online: 'League of Legends · ARAM · discord.gg/yubrio-demo', creatorId: 'jonas', chatEnabled: true, participantsCanInvite: true },
   { id: 'coffee', activity: 'coffee', title: 'Coffee?', detail: 'Starting soon', time: 'Today · 15:30–17:00', startsAt: demoNow - 1000 * 60 * 15, endAt: demoNow + 1000 * 60 * 60, people: ['sarah'], count: 1, location: 'Near the station', creatorId: 'sarah', chatEnabled: true, participantsCanInvite: true },
 ];
 

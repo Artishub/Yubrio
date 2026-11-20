@@ -79,6 +79,13 @@ export function filterInvitableFriendIds(friendIds: string[], viewerId: string, 
   return [...new Set(friendIds)].filter((friendId) => !excluded.has(friendId));
 }
 
+export function findLink(text: string) {
+  const match = /(?:https?:\/\/|discord\.gg\/|discord\.com\/)[^\s]+/i.exec(text);
+  if (!match) return null;
+  const link = match[0].replace(/[.,;:!?)]+$/, '');
+  return /^https?:\/\//i.test(link) ? link : `https://${link}`;
+}
+
 export function isValidClockTime(value: string) {
   const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
   if (!match) return false;
