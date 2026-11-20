@@ -24,7 +24,7 @@ The user can answer three questions at a glance: is anyone around, what is happe
 
 ## First viewport
 
-The first viewport opens directly into a live signal board. “See who is available” is the headline, “Open a room” is the primary action, and “I’m free” is a quieter secondary action with a short explanation. Room moments follow as a horizontal deck, never an infinite stream.
+The first viewport opens on your own status with a one-tap “I’m free”, then free friends as a row of faces, then a short list of open rooms. It is never an infinite stream.
 
 ## Form
 

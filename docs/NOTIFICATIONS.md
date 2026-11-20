@@ -2,7 +2,7 @@
 
 Push is selective and deep-links to the relevant context.
 
-The in-app Activity tab is the lightweight home for actionable room and availability signals. It should stay sparse, link back to the relevant room or Rooms surface, and never become a permanent social inbox.
+There is no separate in-app Activity tab; Home shows the current rooms and free friends directly. An in-app list of past signals can return once push notifications exist.
 
 Examples: “Max is free for the next 3h.”, “Coffee in 20?”, “Sarah opened a room.”, “Jonas said Yeb!”, “Plans changed.”, “Drinks moved to 18:30.”
 

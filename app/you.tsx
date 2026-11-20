@@ -100,7 +100,8 @@ export default function YouScreen() { const { colors, mode, setMode } = useTheme
     }
   };
 
-  return <View style={styles.root}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(64, insets.top + 24), paddingBottom: insets.bottom + 110 }]}>
+  return <View style={styles.root}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 40 }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/(tabs)'); }} style={styles.backButton}><Ionicons name="arrow-back" size={21} color={colors.ink} /></Pressable>
     <YText style={type.title}>You</YText>
     <View style={styles.profile}><Avatar person={currentUser} size={68} /><View style={styles.profileCopy}><YText style={styles.name}>{displayName(currentUser.name)}</YText><YText style={styles.handle}>@{handle}</YText></View><Pressable accessibilityRole="button" accessibilityLabel="Edit profile" onPress={openProfile} style={styles.editButton}><Ionicons name="create" size={21} color={colors.brandText} /></Pressable></View>
     <View style={[styles.availability, { backgroundColor: 'transparent', borderRadius: 0, borderWidth: 0, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.glassBorder, paddingHorizontal: 0, paddingVertical: spacing.xl }]}>
@@ -138,6 +139,7 @@ function audienceLabel(audience?: string) { if (audience === 'circle' || audienc
 const themeModes: { mode: ThemeMode; label: string }[] = [{ mode: 'system', label: 'Auto' }, { mode: 'light', label: 'Light' }, { mode: 'dark', label: 'Dark' }];
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
+  backButton: { width: 44, height: 44, borderRadius: 15, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.glassBorder, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.lg },
   modeRow: { flexDirection: 'row', gap: 4, padding: 3, borderRadius: radius.chip, backgroundColor: colors.surfaceMuted }, modeChip: { minHeight: 38, paddingHorizontal: spacing.md, borderRadius: radius.chip, justifyContent: 'center' }, modeChipSelected: { backgroundColor: colors.brand }, modeText: { fontSize: 13, fontWeight: '800', color: colors.muted }, modeTextSelected: { color: colors.brandInk },
   rowPressed: { opacity: 0.7 }, roomsEmpty: { marginTop: spacing.sm },
   root: { flex: 1, backgroundColor: colors.canvas }, content: { paddingTop: 48, paddingHorizontal: spacing.xl, paddingBottom: 125 }, kicker: { ...type.label, color: colors.muted, marginBottom: 8 }, profile: { flexDirection: 'row', alignItems: 'center', gap: 15, marginTop: 22, marginBottom: 26 }, profileCopy: { flex: 1 }, name: { fontSize: 20, fontWeight: '800' }, handle: { color: colors.muted, fontSize: 14, fontWeight: '600', marginTop: 2 }, editButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.glassBorder, alignItems: 'center', justifyContent: 'center' }, disabledAction: { opacity: 0.5 },

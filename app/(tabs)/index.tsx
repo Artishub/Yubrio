@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { demoQuickReply, demoReplyDelayMs } from '@/data/demo';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { RoomMomentCard, SectionTitle, YText } from '@/components/ui';
-import { HomePulse } from '@/components/home-pulse';
+import { ActionButton, Avatar, SectionTitle, YText } from '@/components/ui';
+import { FreeFriends, FreeStatus } from '@/components/home-status';
+import { RoomRow } from '@/components/room-row';
+import { displayName } from '@/utils/display-name';
 import { AvailabilitySheet } from '@/components/sheets';
 import { spacing, type, Colors } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
@@ -21,21 +22,18 @@ import { formatAvailabilityTime, isAvailabilityUpcoming } from '@/lib/validation
 
 export default function HomeScreen() { const { colors } = useTheme(); const styles = useThemedStyles(makeStyles);
   const router = useRouter();
-  const { me, people, circles, rooms, availability, remoteActive, remoteLoading, remoteError, retryHome, joinedRoom, publishAvailability } = useDemo();
+  const { me, people, circles, rooms, availability, remoteActive, remoteLoading, remoteError, retryHome, joinedRoom, publishAvailability, clearAvailability } = useDemo();
   const currentUser = me;
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
   const [freeOpen, setFreeOpen] = useState(false);
   const [actionError, setActionError] = useState('');
   const [messageFor, setMessageFor] = useState<{ id: string; personId: string; name: string } | null>(null);
-  const [roomIndex, setRoomIndex] = useState(0);
+  const [freePending, setFreePending] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [now, setNow] = useState(Date.now);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(timer); }, []);
   const liveAvailability = useMemo(() => availability.filter((item) => !item.expiresAt || item.expiresAt > now).map((item) => ({ ...item, upcoming: isAvailabilityUpcoming(item.startsAt, now), expiresIn: item.expiresAt ? formatAvailabilityTime(item.expiresAt, item.startsAt, now) : item.expiresIn })), [availability, now]);
   const visibleAvailability = useMemo(() => liveAvailability.filter((item) => item.personId !== me.id).sort((a, b) => Number(a.upcoming) - Number(b.upcoming)), [liveAvailability, me.id]);
-  const roomPeek = rooms.length > 1 ? spacing.xxxl : 0;
-  const roomCardWidth = Math.min(Math.max(width - spacing.xl * 2 - roomPeek, 260), 380);
   const openRoom = (roomId: string) => router.push({ pathname: '/room/[id]', params: { id: roomId } });
   const joinRoomFromHome = async (roomId: string) => {
     setActionError('');
@@ -59,12 +57,55 @@ export default function HomeScreen() { const { colors } = useTheme(); const styl
     return subscribeToHome(me.id, () => { void queryClient.invalidateQueries({ queryKey: ['home'] }); });
   }, [me.id, remoteActive]);
 
-  return <View style={styles.root}><ScrollView showsVerticalScrollIndicator={false} refreshControl={remoteActive ? <RefreshControl refreshing={refreshing} onRefresh={() => void refreshHome()} tintColor={colors.brandText} colors={[colors.brandText]} progressBackgroundColor={colors.surface} /> : undefined} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 110 }]}> 
-    <YText style={[type.title, styles.headline]}>{copy.home.headline}</YText>
-    <HomePulse mine={liveAvailability.find((item) => item.personId === me.id)} friends={visibleAvailability.map((item) => { const person = people.find((p) => p.id === item.personId); return person ? { person, expiresIn: item.expiresIn, upcoming: item.upcoming, note: item.note, canMessage: item.canMessage, availabilityId: item.id } : null; }).filter(Boolean) as { person: typeof me; expiresIn: string; upcoming: boolean; note: string; canMessage: boolean; availabilityId: string }[]} onFree={() => setFreeOpen(true)} onMessage={(friend) => { if (friend.canMessage && friend.person.id !== me.id) setMessageFor({ id: friend.availabilityId, personId: friend.person.id, name: friend.person.name }); }} />
-    {remoteLoading && <View accessibilityRole="progressbar" style={styles.status}><ActivityIndicator size="small" color={colors.brandText} /><YText style={styles.statusText}>Loading your people…</YText></View>}{remoteError && <Pressable accessibilityRole="button" accessibilityLabel="Retry loading your people" onPress={retryHome} style={styles.errorStatus}><Ionicons name="cloud-offline-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>Couldn’t load your people. Tap to retry.</YText></Pressable>}{actionError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss error" onPress={() => setActionError('')} style={styles.errorStatus}><Ionicons name="warning-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>{actionError}</YText></Pressable> : null}
-    <View style={styles.sectionHeader}><SectionTitle>{copy.home.rooms}</SectionTitle>{rooms.length ? <YText style={styles.swipeHint}>{roomIndex + 1} / {rooms.length}</YText> : null}</View>{remoteLoading ? <View style={styles.roomLoading}><View style={styles.loadingMark}><ActivityIndicator size="small" color={colors.brandText} /></View><View style={styles.loadingCopy}><YText style={styles.loadingTitle}>Looking for something to happen…</YText><YText style={styles.loadingText}>Your people will show up here.</YText></View></View> : rooms.length ? <><ScrollView horizontal pagingEnabled snapToInterval={roomCardWidth + spacing.md} decelerationRate="fast" showsHorizontalScrollIndicator={false} contentContainerStyle={styles.roomDeck} onMomentumScrollEnd={(event) => setRoomIndex(Math.round(event.nativeEvent.contentOffset.x / (roomCardWidth + spacing.md)))}>{rooms.map((room) => { const roomPeopleIds = room.joined && !room.people.includes(me.id) ? [me.id, ...room.people] : room.people; return <View key={room.id} style={{ width: roomCardWidth }}><RoomMomentCard room={room} people={roomPeopleIds.map((id) => people.find((person) => person.id === id)).filter(Boolean) as typeof people} onOpen={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); openRoom(room.id); }} onYeb={!room.joined ? () => { void joinRoomFromHome(room.id); } : undefined} /></View>; })}</ScrollView><View accessibilityLabel={`Room ${roomIndex + 1} of ${rooms.length}`} style={styles.deckDots}>{rooms.map((room, index) => <View key={room.id} style={[styles.deckDot, index === roomIndex && styles.deckDotActive]} />)}</View></> : <View style={styles.empty}><YText style={styles.emptyTitle}>{copy.home.quietTitle}</YText><YText style={styles.emptyCopy}>{copy.home.quietCopy}</YText></View>}
-  </ScrollView>{freeOpen && <AvailabilitySheet visible onClose={() => setFreeOpen(false)} excludePersonId={currentUser.id} people={people} circles={circles} onPublish={(duration, note, audience, audienceIds, canMessage, times) => publishAvailability({ id: `free-${Date.now()}`, personId: currentUser.id, expiresIn: formatAvailabilityDuration(duration), note, canMessage, audience, audienceIds, ...times })} />}{messageFor && <QuickMessageSheet availabilityId={messageFor.id} personId={messageFor.personId} name={messageFor.name} remoteActive={remoteActive} onClose={() => setMessageFor(null)} onSuggest={() => { const friendId = messageFor.personId; setMessageFor(null); router.push({ pathname: '/(tabs)/create', params: { with: friendId } }); }} />}</View>;
+  const mine = liveAvailability.find((item) => item.personId === me.id);
+  const freeFriends = visibleAvailability.flatMap((item) => {
+    const person = people.find((candidate) => candidate.id === item.personId);
+    return person ? [{ person, expiresIn: item.expiresIn, upcoming: item.upcoming, canMessage: item.canMessage, availabilityId: item.id }] : [];
+  });
+  const changeFree = (action: () => Promise<void>) => {
+    setFreePending(true);
+    setActionError('');
+    void action().catch(() => setActionError('Couldn’t update that. Try again.')).finally(() => setFreePending(false));
+  };
+
+  return <View style={styles.root}>
+    <ScrollView showsVerticalScrollIndicator={false} refreshControl={remoteActive ? <RefreshControl refreshing={refreshing} onRefresh={() => void refreshHome()} tintColor={colors.brandText} colors={[colors.brandText]} progressBackgroundColor={colors.surface} /> : undefined} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 110 }]}>
+      <View style={styles.header}>
+        <YText style={[type.title, styles.greeting]} numberOfLines={1}>{copy.home.greeting} {displayName(me.name)}</YText>
+        <Pressable accessibilityRole="button" accessibilityLabel="Your profile and settings" onPress={() => router.push('/you')} style={({ pressed }) => pressed && styles.pressed}><Avatar person={me} size={44} /></Pressable>
+      </View>
+
+      <FreeStatus
+        mine={mine}
+        pending={freePending}
+        onFreeNow={() => changeFree(() => publishAvailability({ id: `free-${Date.now()}`, personId: me.id, expiresIn: '3h left', note: '', canMessage: true, audience: 'Everyone', audienceIds: [] }))}
+        onOptions={() => setFreeOpen(true)}
+        onEnd={() => changeFree(() => clearAvailability(me.id))}
+      />
+
+      {remoteLoading && <View accessibilityRole="progressbar" style={styles.status}><ActivityIndicator size="small" color={colors.brandText} /><YText style={styles.statusText}>Loading your people…</YText></View>}
+      {remoteError && <Pressable accessibilityRole="button" accessibilityLabel="Retry loading your people" onPress={retryHome} style={styles.errorStatus}><Ionicons name="cloud-offline-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>Couldn’t load your people. Tap to retry.</YText></Pressable>}
+      {actionError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss error" onPress={() => setActionError('')} style={styles.errorStatus}><Ionicons name="warning-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>{actionError}</YText></Pressable> : null}
+
+      <View style={styles.section}>
+        <SectionTitle>{copy.home.friendsAvailable}</SectionTitle>
+        <FreeFriends friends={freeFriends} onPress={(friend) => setMessageFor({ id: friend.availabilityId, personId: friend.person.id, name: friend.person.name })} />
+      </View>
+
+      <View style={styles.section}>
+        <SectionTitle>{copy.home.rooms}</SectionTitle>
+        {rooms.length ? <View style={styles.roomList}>{rooms.map((room) => {
+          const memberIds = room.joined && !room.people.includes(me.id) ? [me.id, ...room.people] : room.people;
+          const members = memberIds.flatMap((id) => people.find((person) => person.id === id) ?? (id === me.id ? me : []));
+          return <RoomRow key={room.id} room={room} people={members} onOpen={() => openRoom(room.id)} onYeb={() => void joinRoomFromHome(room.id)} />;
+        })}</View> : !remoteLoading && <View style={styles.empty}>
+          <YText style={styles.emptyTitle}>{copy.home.quietTitle}</YText>
+          <YText style={styles.emptyCopy}>{copy.home.quietCopy}</YText>
+          <ActionButton label={copy.home.openRoom} icon="add" onPress={() => router.push('/(tabs)/create')} style={styles.emptyAction} />
+        </View>}
+      </View>
+    </ScrollView>
+    {freeOpen && <AvailabilitySheet visible onClose={() => setFreeOpen(false)} excludePersonId={currentUser.id} people={people} circles={circles} onPublish={(duration, note, audience, audienceIds, canMessage, times) => publishAvailability({ id: `free-${Date.now()}`, personId: currentUser.id, expiresIn: formatAvailabilityDuration(duration), note, canMessage, audience, audienceIds, ...times })} />}{messageFor && <QuickMessageSheet availabilityId={messageFor.id} personId={messageFor.personId} name={messageFor.name} remoteActive={remoteActive} onClose={() => setMessageFor(null)} onSuggest={() => { const friendId = messageFor.personId; setMessageFor(null); router.push({ pathname: '/(tabs)/create', params: { with: friendId } }); }} />}</View>;
 }
 
 type QuickMessage = { id: string; body: string; pending?: boolean; mine?: boolean };
@@ -98,21 +139,11 @@ function QuickMessageSheet({ availabilityId, personId, name, remoteActive, onClo
 function formatAvailabilityDuration(duration: string) { return duration === 'Today' ? 'until tonight' : `${duration} left`; }
 function makeLocalMessageId() { return `local-${new Date().getTime()}-${Math.random().toString(36).slice(2)}`; }
 const makeStyles = (colors: Colors) => StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md, marginBottom: spacing.lg }, greeting: { flex: 1 }, pressed: { opacity: 0.7 },
+  section: { marginTop: spacing.xxl }, roomList: { gap: spacing.sm }, emptyAction: { marginTop: spacing.lg },
   root: { flex: 1, backgroundColor: colors.canvas },
   content: { paddingTop: 64, paddingHorizontal: spacing.xl, paddingBottom: 125 },
-  headline: { marginBottom: spacing.lg },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.line, paddingTop: spacing.lg, marginBottom: spacing.md },
-  swipeHint: { color: colors.muted, fontSize: 10, fontWeight: '900', letterSpacing: 1.3 },
-  roomDeck: { gap: spacing.md, paddingBottom: spacing.sm },
-  deckDots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 8, marginBottom: spacing.xxxl },
-  deckDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.line },
-  deckDotActive: { width: 18, backgroundColor: colors.brand },
   empty: { padding: spacing.xl, backgroundColor: colors.surface, borderRadius: 22 },
-  roomLoading: { minHeight: 112, flexDirection: 'row', alignItems: 'center', gap: 12, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: 20, borderWidth: 1, borderColor: colors.glassBorder },
-  loadingMark: { width: 38, height: 38, borderRadius: 13, backgroundColor: colors.surfaceStrong, alignItems: 'center', justifyContent: 'center' },
-  loadingCopy: { flex: 1 },
-  loadingTitle: { fontSize: 14, fontWeight: '800' },
-  loadingText: { color: colors.muted, fontSize: 12, fontWeight: '600', marginTop: 3 },
   emptyTitle: { fontSize: 20, fontWeight: '800' },
   emptyCopy: { color: colors.muted, marginTop: 4, fontSize: 15, fontWeight: '600' },
   messageOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlay },

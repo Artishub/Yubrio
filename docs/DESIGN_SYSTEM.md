@@ -6,9 +6,9 @@
 - System sans for platform readability; confident 30–34px titles, 15–17px body, 11–13px metadata.
 - Surfaces: deep ink canvas, quiet charcoal structure, sparse activity color fields, and restrained dark glass for floating/live surfaces.
 - On iOS 26+ builds, `GlassBackdrop` uses Expo's native `GlassView`; web, Android, and older iOS use the existing blur/frosted fallback. Keep glass to floating navigation, live cards, and contextual surfaces rather than applying it to every panel.
-- Rooms opens directly on a live signal board: “See who is available” is the headline, “I’m free” is the primary in-content action, and room creation lives in the dedicated Open tab action. Use activity icons, status marks, and the tab action for energy; avoid duplicate room-creation buttons, orbital bubbles, oversized circles, decorative fields, or noise.
-- The bottom bar has five destinations: Rooms, Friends, centered Open, Activity, and You. Activity is a compact signal tray for actionable updates, never an infinite feed or permanent Messages inbox.
-- Active rooms use `RoomMomentCard` in a horizontal, paged deck. Use the deck for discovery and the room route for detail; do not turn it into an infinite feed. Keep the surface neutral and let the activity icon, status mark, and a restrained accent rail carry the distinction.
+- Home opens on your own status: a card with a one-tap “I’m free” (3 hours, all friends) and an options button for times and audience; once free, the card shows the state with Change and End. Below it, free friends appear as a horizontal row of faces (solid ring and dot = free now, dashed ring = free later), then rooms. Room creation lives in the Open tab action; the empty rooms state may offer it once.
+- The bottom bar has three destinations: Home, centered Open, and Friends. Profile and settings open from the avatar at the top of Home. There is no Activity tab; in-app signals live on Home until push notifications exist.
+- Rooms use `RoomRow` in a short vertical list so several are visible at once: activity icon, title, time (with a “Now” mark while running), place in the activity color, who is in, and a Yeb button. It is a list of what is open right now, never an infinite feed.
 - Friends uses a lightweight invite prompt, people summary, and horizontal circle rail; keep the invite state inline and quiet on the shared canvas.
 - People avatars use bright solid fills with dark initials for quick recognition against the dark canvas.
 - Room detail is intentionally editorial: a left-weighted activity header, one clear primary state, and transparent People/Suggestions/Chat sections separated by rhythm rather than repeated containers.
@@ -37,8 +37,8 @@
 - Yeb uses medium/light haptic, a short spring, label change, and participant entrance. Joining or opening a room also plays `YebBurst`: one ring and a few activity-colored sparks, under 500ms, skipped with reduced motion.
 - Room creation uses a success haptic and visible insertion into Home.
 - Keep the canvas visually quiet until a live signal, room, or response creates a reason for color and motion.
-- Use spatial grouping and horizontal room moments to break list rhythm; avoid stacking several rounded rectangles with identical weight.
-- Horizontal room decks use native paging/swipe behavior with visible position dots; never make swiping the only way to reach a core action.
+- Keep the home list short and scannable; let the activity icon and color distinguish rows.
+- The free friends row scrolls horizontally; never make swiping the only way to reach a core action.
 - Use blur/material behind floating controls and live surfaces when supported; keep a coherent opaque fallback for web and older platforms. Prefer one material treatment per visual group and preserve readable contrast.
 - Motion is 100–180ms for feedback, 200–350ms for transitions, 300–500ms for celebration. Respect reduced motion.
 

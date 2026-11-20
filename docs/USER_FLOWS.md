@@ -2,19 +2,19 @@
 
 ## Home
 
-Launch → Rooms → “See who is available” → I’m free → available friends → active rooms. Quiet state says “Pretty quiet right now. You could change that.”
+Launch → Home → own status (I’m free in one tap, or options) → free friends → rooms. Quiet state says “Pretty quiet right now. You could change that.” and offers to open a room.
 
 ## Open a room
 
-Rooms → Open in the tab bar → activity → time + duration → In person / Online / Undecided → audience → options → Create → immediate room transition.
+Home → Open in the tab bar → activity → time + duration → In person / Online / Undecided → audience → options → Create → immediate room transition.
 
 ## Join a room
 
-Rooms → room card → room detail → Yeb! or Yeb, but later → participant list → optional temporary chat. Joined state says “You’re in.”
+Home → room row → room detail → Yeb! or Yeb, but later → participant list → optional temporary chat. Yeb also works directly on the row. Joined state says “You’re in.”
 
 ## Availability
 
-Rooms → I’m free → duration → audience → optional note → publish → availability card. Friend card → contextual Message → temporary conversation → suggest activity / Open in the tab bar.
+Home → I’m free (one tap: 3 hours, all friends) or options → when → audience → optional note → publish → status card with Change and End. Free friend → quick note → temporary conversation → open a room with that friend.
 
 ## Friends and circles
 
@@ -22,7 +22,7 @@ Friends → Add friend → QR/share/search → reciprocal acceptance. Friends �
 
 ## Navigation
 
-Rooms, Friends, Open, Activity, You. Rooms and availability live in Rooms; room creation is only entered from the centered Open tab action. Activity is a lightweight tray for actionable room and availability signals, not a social feed or permanent inbox. Messaging remains contextual. Profile/You owns current availability, settings, and account controls.
+Home, Open, Friends. Rooms and availability live on Home; room creation is entered from the centered Open tab action. Messaging remains contextual. You (profile, current availability, your rooms, appearance, settings, account) opens from the avatar on Home.
 
 ## Required states
 
