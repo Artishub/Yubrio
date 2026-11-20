@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { availability as seededAvailability, circles as seededCircles, rooms as seededRooms } from '@/data/demo';
-import { currentUser, people as seededPeople } from '@/data/demo';
+import { currentUser, demoReplyDelayMs, people as seededPeople } from '@/data/demo';
 import { Availability, Circle, Person, Room } from '@/types';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { createCircle as createRemoteCircle, createRoom as createRemoteRoom, fetchAcceptedFriends, fetchActiveRooms, fetchOwnProfile, fetchOwnedCircles, fetchVisibleAvailability, joinRoom as joinRemoteRoom, leaveRoom as leaveRemoteRoom, publishAvailability as publishRemoteAvailability, clearAvailability as clearRemoteAvailability, updateOwnProfile } from '@/lib/supabase/repositories';
@@ -29,6 +29,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const profileKey = session?.user.id ?? 'demo';
   const profileName = profileOverride?.key === profileKey ? profileOverride.name : null;
   useEffect(() => { roomsRef.current = rooms; }, [rooms]);
+  const demoTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => demoTimers.current.forEach(clearTimeout), []);
   const sessionName = profileName ?? session?.user.user_metadata?.display_name ?? session?.user.email?.split('@')[0] ?? 'You';
   const me: Person = session && remoteEnabled ? { id: session.user.id, name: sessionName, initials: sessionName.slice(0, 1).toUpperCase(), color: '#D9F96B' } : { ...currentUser, ...(profileName ? { name: profileName, initials: profileName.slice(0, 1).toUpperCase() } : {}) };
   const remoteHome = useQuery({ queryKey: ['home', session?.user.id], queryFn: async () => Promise.all([fetchActiveRooms(), fetchVisibleAvailability(), fetchAcceptedFriends(), fetchOwnedCircles(), fetchOwnProfile()]), enabled: remoteEnabled, staleTime: 30_000 });
@@ -38,7 +40,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const leaveRoom = useCallback(async (id: string) => { const previous = rooms; const viewerId = session?.user.id ?? currentUser.id; setRooms((items) => items.map((room) => { if (room.id !== id || !room.joined) return room; const arrivalByPerson = { ...room.arrivalByPerson }; delete arrivalByPerson[viewerId]; return { ...room, joined: false, arrival: undefined, arrivalByPerson, count: Math.max(0, room.count - 1) }; })); if (!remoteEnabled || id.startsWith('room-')) return; try { await leaveRemoteRoom(id); void queryClient.invalidateQueries({ queryKey: ['home'] }); void queryClient.invalidateQueries({ queryKey: ['room', id] }); } catch { setRooms(previous); throw new Error('Couldn’t leave that room. Try again.'); } }, [remoteEnabled, rooms, session]);
   const addRoom = useCallback(async (room: Room) => {
     setRooms((items) => [room, ...items]);
-    if (!remoteEnabled) return room.id;
+    if (!remoteEnabled) {
+      const friendId = demoFriendFor(room, circles, people);
+      if (friendId) demoTimers.current.push(setTimeout(() => setRooms((items) => items.map((item) => item.id === room.id && !item.people.includes(friendId) ? { ...item, people: [...item.people, friendId], count: item.count + 1 } : item)), demoReplyDelayMs));
+      return room.id;
+    }
     try {
       const isCircle = room.audience === 'Choose circles' || circles.some((circle) => circle.name === room.audience);
       const saved = await createRemoteRoom({ activity: room.activity, title: room.title, startsAt: new Date(room.startsAt ?? Date.now()), endsAt: new Date(room.endAt), locationMode: room.locationMode ?? (room.online ? 'online' : room.location ? 'in_person' : 'undecided'), placeName: room.placeName ?? room.location, onlineDetails: room.onlineDetails ?? room.online, audience: room.audience === 'Choose people' ? 'people' : isCircle ? 'circle' : 'everyone', circleIds: isCircle ? room.audienceIds : undefined, profileIds: room.audience === 'Choose people' ? room.audienceIds : undefined, chatEnabled: room.chatEnabled, participantsCanInvite: room.participantsCanInvite });
@@ -49,7 +55,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       setRooms((items) => items.filter((item) => item.id !== room.id));
       throw new Error('Couldn’t open that room. Try again.');
     }
-  }, [circles, remoteEnabled, session]);
+  }, [circles, people, remoteEnabled, session]);
   const addCircle = useCallback(async (circle: Circle) => { if (!remoteEnabled) { setCircles((items) => [...items, circle]); return; } const saved = await createRemoteCircle(circle.name, circle.memberIds); setCircles((items) => [...items, saved]); }, [remoteEnabled]);
   const addFriendByHandle = useCallback((handle: string) => {
     const normalized = handle.trim().toLowerCase();
@@ -68,6 +74,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const visibleAvailability = remoteEnabled && !remoteReady ? [] : availability;
   const value: DemoContextValue = { me, people: visiblePeople, circles: visibleCircles, rooms: visibleRooms, roomArchive: remoteEnabled && !remoteReady ? [] : roomArchive, availability: visibleAvailability, remoteActive: remoteReady, remoteLoading: remoteEnabled && remoteHome.isPending, remoteError: remoteEnabled && remoteHome.isError, retryHome: () => { void remoteHome.refetch(); }, joinedRoom, leaveRoom, addRoom, addCircle, addFriendByHandle, publishAvailability, clearAvailability, updateProfile };
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+}
+
+function demoFriendFor(room: Room, circles: Circle[], people: Person[]) {
+  const candidates = room.audience === 'Choose people' ? room.audienceIds ?? []
+    : room.audience === 'Choose circles' ? circles.filter((circle) => room.audienceIds?.includes(circle.id)).flatMap((circle) => circle.memberIds)
+    : [...people.filter((person) => person.online), ...people].map((person) => person.id);
+  return candidates.find((id) => id !== room.creatorId);
 }
 
 function mapRemoteRoom(row: any, userId: string): Room { const members = row.room_members ?? []; const activity = activityMeta[row.activity as keyof typeof activityMeta] ? row.activity : 'custom'; const start = new Date(row.starts_at); const end = new Date(row.ends_at); const time = formatRemoteRoomTime(start, end); const arrivalByPerson = Object.fromEntries(members.filter((member: any) => member.arrival_at).map((member: any) => [member.profile_id, formatArrival(member.arrival_at)])); return { id: row.id, activity, title: row.title, time, startsAt: start.getTime(), endAt: end.getTime(), people: members.map((member: any) => member.profile_id), participantDetails: members.flatMap((member: any) => member.profiles ? [{ id: member.profiles.id, name: member.profiles.display_name, initials: member.profiles.initials, color: member.profiles.avatar_color }] : []), count: members.length, location: row.place_name ?? undefined, online: row.location_mode === 'online' ? row.online_details ?? 'Online' : undefined, locationMode: row.location_mode, placeName: row.place_name ?? undefined, onlineDetails: row.online_details ?? undefined, creatorId: row.creator_id, chatEnabled: row.chat_enabled, participantsCanInvite: row.participants_can_invite, joined: members.some((member: any) => member.profile_id === userId), arrivalByPerson }; }

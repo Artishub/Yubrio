@@ -32,6 +32,10 @@ export const availability: Availability[] = [
   { id: 'alex-free', personId: 'alex', expiresIn: 'until tonight', expiresAt: Date.now() + 7 * 60 * 60 * 1000, note: 'Maybe coffee or gaming.', canMessage: true },
 ];
 
+// In demo mode a friend reacts after this delay, so the flows can be felt without a backend.
+export const demoReplyDelayMs = 3500;
+export const demoQuickReply = 'Yeb! Give me ten minutes.';
+
 export const roomMessages: Record<string, { author: string; body: string }[]> = {
   drinks: [{ author: 'Lisa', body: 'I can get there around 18:00.' }, { author: 'Max', body: 'I’ll grab a table.' }],
   league: [{ author: 'Jonas', body: 'Plans looking good.' }, { author: 'Lisa', body: 'I can make it around 17:30.' }],

@@ -24,7 +24,7 @@ function SheetShell({ visible, children, onClose, footer }: { visible: boolean; 
   </Modal>;
 }
 
-export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjom', circles = [], people = seededPeople }: { visible: boolean; onClose: () => void; onCreate: (room: Room) => void; creatorId?: string; circles?: Circle[]; people?: Person[] }) {
+export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjom', circles = [], people = seededPeople, withFriendId }: { visible: boolean; onClose: () => void; onCreate: (room: Room) => void; creatorId?: string; circles?: Circle[]; people?: Person[]; withFriendId?: string }) {
   const [step, setStep] = useState(0);
   const [activity, setActivity] = useState<ActivityType>('drinks');
   const [when, setWhen] = useState('Now');
@@ -36,9 +36,9 @@ export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjo
   const [gameTitle, setGameTitle] = useState('');
   const [gameMode, setGameMode] = useState('');
   const [onlineDetails, setOnlineDetails] = useState('');
-  const [audience, setAudience] = useState('All friends');
+  const [audience, setAudience] = useState(withFriendId ? 'Choose people' : 'All friends');
   const [selectedCircles, setSelectedCircles] = useState<string[]>([]);
-  const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
+  const [selectedPeople, setSelectedPeople] = useState<string[]>(withFriendId ? [withFriendId] : []);
   const [title, setTitle] = useState('');
   const [chatEnabled, setChatEnabled] = useState(true);
   const [participantsCanInvite, setParticipantsCanInvite] = useState(true);

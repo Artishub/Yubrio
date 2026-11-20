@@ -27,3 +27,7 @@ Rooms, Friends, Open, Activity, You. Rooms and availability live in Rooms; room 
 ## Required states
 
 Every core surface has loading skeletons, optimistic feedback where safe, recoverable errors, empty states, disabled/loading actions, and reduced-motion behavior.
+
+## Demo reactions
+
+Without Supabase, seeded friends react so the flows can be felt: a friend from the room's audience joins a room you open after a few seconds, and a free friend answers your first quick note. From a quick note, “Open a room with <name>” starts room creation with that friend preselected as the audience.
