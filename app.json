@@ -6,7 +6,7 @@
     "extra": { "deepLinkDomains": ["yubrio.com", "yubr.io"] },
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
       "expo-router",

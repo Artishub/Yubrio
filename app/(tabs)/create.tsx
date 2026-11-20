@@ -1,10 +1,11 @@
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { CreateRoomSheet } from '@/components/sheets';
-import { colors } from '@/design/tokens';
+import { Colors } from '@/design/tokens';
+import { useThemedStyles } from '@/design/theme';
 import { useDemo } from '@/stores/demo-store';
 
-export default function CreateRoomScreen() {
+export default function CreateRoomScreen() { const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const segments = useSegments();
   const isFocused = segments[segments.length - 1] === 'create';
@@ -28,4 +29,4 @@ export default function CreateRoomScreen() {
   </View>;
 }
 
-const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: colors.canvas } });
+const makeStyles = (colors: Colors) => StyleSheet.create({ root: { flex: 1, backgroundColor: colors.canvas } });

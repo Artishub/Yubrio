@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { Easing, SharedValue, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
-import { colors, motion } from '@/design/tokens';
+import { motion, Colors } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 
-const sparkColors = [colors.brand, colors.coral, colors.violet, colors.sky, colors.coffee];
+const sparkColors = ['brand', 'coral', 'violet', 'sky', 'coffee'] as const;
 const sparks = Array.from({ length: 12 }, (_, index) => ({
   angle: (index / 12) * Math.PI * 2,
   distance: index % 2 === 0 ? 86 : 58,
@@ -12,7 +13,7 @@ const sparks = Array.from({ length: 12 }, (_, index) => ({
 }));
 
 // Plays once each time `active` turns true (and on mount when `playOnMount` is set).
-export function YebBurst({ active, playOnMount = false }: { active: boolean; playOnMount?: boolean }) {
+export function YebBurst({ active, playOnMount = false }: { active: boolean; playOnMount?: boolean }) { const { colors } = useTheme(); const styles = useThemedStyles(makeStyles);
   const reducedMotion = useReducedMotion();
   const progress = useSharedValue(1);
   const wasActive = useRef(playOnMount ? false : active);
@@ -34,11 +35,11 @@ export function YebBurst({ active, playOnMount = false }: { active: boolean; pla
 
   return <View pointerEvents="none" accessible={false} style={styles.root}>
     <Animated.View style={[styles.ring, ringStyle]} />
-    {sparks.map((spark, index) => <Spark key={index} progress={progress} {...spark} />)}
+    {sparks.map((spark, index) => <Spark key={index} progress={progress} angle={spark.angle} distance={spark.distance} color={colors[spark.color]} />)}
   </View>;
 }
 
-function Spark({ progress, angle, distance, color }: { progress: SharedValue<number>; angle: number; distance: number; color: string }) {
+function Spark({ progress, angle, distance, color }: { progress: SharedValue<number>; angle: number; distance: number; color: string }) { const styles = useThemedStyles(makeStyles);
   const style = useAnimatedStyle(() => ({
     opacity: progress.value >= 1 ? 0 : 1 - progress.value * progress.value,
     transform: [
@@ -50,8 +51,8 @@ function Spark({ progress, angle, distance, color }: { progress: SharedValue<num
   return <Animated.View style={[styles.spark, { backgroundColor: color }, style]} />;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   root: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center', zIndex: 3 },
-  ring: { position: 'absolute', width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: colors.brand },
+  ring: { position: 'absolute', width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: colors.brandText },
   spark: { position: 'absolute', width: 9, height: 9, borderRadius: 5 },
 });

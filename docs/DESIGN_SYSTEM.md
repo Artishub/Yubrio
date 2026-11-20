@@ -2,7 +2,7 @@
 
 ## Foundation
 
-- Dark-first mobile UI with a composed light-mode structure ready for later theming.
+- Dark and light mode. `src/design/tokens.ts` holds one palette per mode with the same role names; components read colors through `useTheme()` and build style sheets with `useThemedStyles(makeStyles)`, never from a fixed import. The mode follows the system by default and can be set to Auto, Light, or Dark under You → Appearance (stored on the device).
 - System sans for platform readability; confident 30–34px titles, 15–17px body, 11–13px metadata.
 - Surfaces: deep ink canvas, quiet charcoal structure, sparse activity color fields, and restrained dark glass for floating/live surfaces.
 - On iOS 26+ builds, `GlassBackdrop` uses Expo's native `GlassView`; web, Android, and older iOS use the existing blur/frosted fallback. Keep glass to floating navigation, live cards, and contextual surfaces rather than applying it to every panel.
@@ -17,11 +17,11 @@
 
 ## Semantic color roles
 
-- `canvas`: `#090B0D`, the ink-black app background.
-- `surface`: `#14191D`, the quiet elevated charcoal surface.
+- `canvas`: the app background, ink-black `#090B0D` in dark and warm off-white `#F5F6F1` in light.
+- `surface`: the quiet elevated surface, charcoal `#14191D` in dark and white in light.
 - `ink`: soft near-white primary text.
 - `muted`: readable cool gray secondary text.
-- `brand`: acid lime for primary action and active state.
+- `brand`: acid lime for primary action fills and active state. Use `brandText` when the brand color is text or an icon on the canvas: it is lime in dark mode and a dark green in light mode so it stays readable.
 - `electric`, `violet`, `sky`, and `coral`: small expressive accents used to distinguish activity without recoloring entire cards.
 - `glassSurface`, `glassBorder`, and `glassHighlight`: translucent dark material roles used for the floating tab bar, live availability, and active room cards. Glass should clarify layering and state, not decorate every surface.
 - Activities: coffee amber, drinks coral, food tomato, gaming violet, walk sky, gym green, hangout blue, custom slate, availability lime.

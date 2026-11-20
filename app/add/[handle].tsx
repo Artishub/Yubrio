@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { ActionButton, Avatar, YText } from '@/components/ui';
-import { colors, radius, spacing, type } from '@/design/tokens';
+import { radius, spacing, type, Colors } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 import { currentUser, people } from '@/data/demo';
 import { useAuth } from '@/stores/auth-store';
 import { useDemo } from '@/stores/demo-store';
@@ -14,7 +15,7 @@ import { queryClient } from '@/lib/query/client';
 import { Person } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function AddFriendScreen() {
+export default function AddFriendScreen() { const { colors } = useTheme(); const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -60,7 +61,7 @@ export default function AddFriendScreen() {
 
 function mapRemoteProfile(row: { profile_id: string; display_name: string; initials: string; avatar_color: string }): Person { return { id: row.profile_id, name: row.display_name, initials: row.initials, color: row.avatar_color }; }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   pointerNone: { pointerEvents: 'none' },
   root: { flex: 1, backgroundColor: colors.canvas }, fieldLayer: { ...StyleSheet.absoluteFill, overflow: 'hidden' }, colorField: { position: 'absolute', opacity: 0.12, transform: [{ rotate: '18deg' }] }, fieldOne: { width: 220, height: 84, top: 134, right: -112, backgroundColor: colors.electric }, fieldTwo: { width: 170, height: 70, bottom: 110, left: -98, backgroundColor: colors.coral }, content: { flexGrow: 1, paddingTop: 56, paddingHorizontal: spacing.xl, paddingBottom: 48 }, back: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.glassSurface, borderWidth: 1, borderColor: colors.glassBorder, alignItems: 'center', justifyContent: 'center', marginBottom: 46 }, mark: { width: 54, height: 54, borderRadius: 18, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }, kicker: { ...type.label, color: colors.muted, marginBottom: 8 }, copy: { color: colors.muted, fontSize: 16, lineHeight: 23, fontWeight: '600', marginTop: 10, maxWidth: 330 }, profileCard: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.glassBorder, padding: 28, marginVertical: 30 }, profileName: { fontSize: 22, fontWeight: '800', marginTop: 15 }, profileHandle: { color: colors.muted, fontSize: 14, fontWeight: '700', marginTop: 3 }, connected: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 16, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceMuted }, connectedText: { color: colors.gym, fontSize: 13, fontWeight: '800' }, error: { color: colors.error, textAlign: 'center', fontSize: 13, fontWeight: '700', marginBottom: 16 },
 });

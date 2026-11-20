@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { ActivityIcon, Avatar, YText } from '@/components/ui';
-import { colors, spacing } from '@/design/tokens';
+import { spacing, Colors } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
 import { Person } from '@/types';
 import { displayName } from '@/utils/display-name';
@@ -18,7 +19,7 @@ type HomePulseProps = {
   onMessage: (friend: PulseFriend) => void;
 };
 
-export function HomePulse({ mine, friends, onFree, onMessage }: HomePulseProps) {
+export function HomePulse({ mine, friends, onFree, onMessage }: HomePulseProps) { const { colors } = useTheme(); const styles = useThemedStyles(makeStyles);
   const isFree = Boolean(mine);
   const freeNow = Boolean(mine && !mine.upcoming);
   const reducedMotion = useReducedMotion();
@@ -53,7 +54,7 @@ export function HomePulse({ mine, friends, onFree, onMessage }: HomePulseProps) 
   </View>;
 }
 
-function PulseFriendBubble({ friend, index, reducedMotion, onPress }: { friend: PulseFriend; index: number; reducedMotion: boolean | undefined; onPress: () => void }) {
+function PulseFriendBubble({ friend, index, reducedMotion, onPress }: { friend: PulseFriend; index: number; reducedMotion: boolean | undefined; onPress: () => void }) { const { colors } = useTheme(); const styles = useThemedStyles(makeStyles);
   const pressFriend = () => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); };
   const canMessage = friend.canMessage;
   return <Animated.View entering={reducedMotion ? undefined : FadeInDown.delay(90 + index * 70).springify()} style={styles.friendSignal}>
@@ -65,7 +66,7 @@ function PulseFriendBubble({ friend, index, reducedMotion, onPress }: { friend: 
   </Animated.View>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   shell: { marginBottom: spacing.xxxl },
   shellCompact: { marginBottom: spacing.xl },
   hero: { minHeight: 62, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 10 },

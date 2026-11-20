@@ -1,9 +1,10 @@
-export const colors = {
+const dark = {
   canvas: '#090B0D',
   surface: '#14191D',
   surfaceMuted: '#252D32',
   surfaceStrong: '#0C1012',
   glassSurface: 'rgba(20, 27, 31, 0.82)',
+  glassWeb: 'rgba(30, 42, 37, 0.54)',
   glassBorder: 'rgba(244, 247, 242, 0.16)',
   glassHighlight: 'rgba(244, 247, 242, 0.08)',
   ink: '#F4F7F2',
@@ -29,14 +30,73 @@ export const colors = {
   availability: '#D9FF57',
   error: '#C8564F',
   overlay: 'rgba(0,0,0,0.58)',
+  brandText: '#D9FF57',
+  shadow: 'rgba(0, 0, 0, 0.3)',
+  coffeeTint: '#3B2A18',
+  drinksTint: '#3A201D',
+  foodTint: '#3A211D',
+  gamingTint: '#292445',
+  walkTint: '#17323A',
+  gymTint: '#1E3520',
+  hangoutTint: '#1D2D4A',
+  customTint: '#27312B',
+  availabilityTint: '#2D3A1A',
 };
+
+export type Colors = typeof dark;
+
+const light: Colors = {
+  canvas: '#F5F6F1',
+  surface: '#FFFFFF',
+  surfaceMuted: '#E8EBE3',
+  surfaceStrong: '#FFFFFF',
+  glassSurface: 'rgba(255, 255, 255, 0.86)',
+  glassWeb: 'rgba(255, 255, 255, 0.72)',
+  glassBorder: 'rgba(18, 23, 26, 0.12)',
+  glassHighlight: 'rgba(18, 23, 26, 0.05)',
+  ink: '#12171A',
+  muted: '#566065',
+  faint: '#8A9498',
+  line: '#DADFD5',
+  brand: '#C9F23A',
+  brandPressed: '#A8D11C',
+  brandInk: '#16200A',
+  brandWash: 'rgba(201, 242, 58, 0.28)',
+  electric: '#4458E0',
+  violet: '#7B4FD6',
+  sky: '#0E8FA3',
+  coral: '#D9482F',
+  coffee: '#A86200',
+  drinks: '#D9482F',
+  food: '#CF3B28',
+  gaming: '#6548E0',
+  walk: '#0E8FA3',
+  gym: '#3B8A1C',
+  hangout: '#2C66D8',
+  custom: '#5C676B',
+  availability: '#4E6B00',
+  error: '#B93A33',
+  overlay: 'rgba(18, 23, 26, 0.42)',
+  brandText: '#4E6B00',
+  shadow: 'rgba(18, 23, 26, 0.10)',
+  coffeeTint: '#FBEBD2',
+  drinksTint: '#FCE2DC',
+  foodTint: '#FCE0DB',
+  gamingTint: '#E8E3FB',
+  walkTint: '#D9F1F4',
+  gymTint: '#E1F2D8',
+  hangoutTint: '#DEE9FB',
+  customTint: '#E6EAE8',
+  availabilityTint: '#E9F6BF',
+};
+
+export const palettes = { dark, light };
+export type Scheme = keyof typeof palettes;
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32, huge: 40 };
 export const radius = { card: 20, sheet: 30, button: 14, icon: 14, chip: 999 };
 export const motion = { celebration: 480 };
-export const shadow = {
-  card: { boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.3)', elevation: 3 },
-};
+export const shadowCard = (colors: Colors) => ({ boxShadow: `0px 8px 16px ${colors.shadow}`, elevation: 3 });
 export const type = {
   title: { fontSize: 34, lineHeight: 38, fontWeight: '800' as const, letterSpacing: -1.4 },
   section: { fontSize: 22, lineHeight: 27, fontWeight: '800' as const, letterSpacing: -0.6 },
@@ -45,16 +105,25 @@ export const type = {
   meta: { fontSize: 13, lineHeight: 18, fontWeight: '600' as const },
 };
 
-export const activityMeta = {
-  coffee: { label: 'Coffee', icon: 'cafe-outline', color: colors.coffee, tint: '#3B2A18' },
-  drinks: { label: 'Drinks', icon: 'wine-outline', color: colors.drinks, tint: '#3A201D' },
-  food: { label: 'Food', icon: 'restaurant-outline', color: colors.food, tint: '#3A211D' },
-  gaming: { label: 'Gaming', icon: 'game-controller-outline', color: colors.gaming, tint: '#292445' },
-  walk: { label: 'Walk', icon: 'walk-outline', color: colors.walk, tint: '#17323A' },
-  gym: { label: 'Gym', icon: 'barbell-outline', color: colors.gym, tint: '#1E3520' },
-  hangout: { label: 'Hang out', icon: 'sunny-outline', color: colors.hangout, tint: '#1D2D4A' },
-  custom: { label: 'Custom', icon: 'sparkles-outline', color: colors.custom, tint: '#27312B' },
-  availability: { label: 'Free', icon: 'radio-button-on-outline', color: colors.availability, tint: '#2D3A1A' },
+const activityInfo = {
+  coffee: { label: 'Coffee', icon: 'cafe-outline' },
+  drinks: { label: 'Drinks', icon: 'wine-outline' },
+  food: { label: 'Food', icon: 'restaurant-outline' },
+  gaming: { label: 'Gaming', icon: 'game-controller-outline' },
+  walk: { label: 'Walk', icon: 'walk-outline' },
+  gym: { label: 'Gym', icon: 'barbell-outline' },
+  hangout: { label: 'Hang out', icon: 'sunny-outline' },
+  custom: { label: 'Custom', icon: 'sparkles-outline' },
+  availability: { label: 'Free', icon: 'radio-button-on-outline' },
 } as const;
 
-export type ActivityType = keyof typeof activityMeta;
+export type ActivityType = keyof typeof activityInfo;
+export const activityTypes = Object.keys(activityInfo) as ActivityType[];
+export const isActivityType = (value: string): value is ActivityType => value in activityInfo;
+
+export function activityMetaFor(colors: Colors) {
+  const entries = activityTypes.map((activity) => [activity, { ...activityInfo[activity], color: colors[activity], tint: colors[`${activity}Tint`] }] as const);
+  return Object.fromEntries(entries) as Record<ActivityType, { label: string; icon: string; color: string; tint: string }>;
+}
+
+export const activityLabel = (activity: ActivityType) => activityInfo[activity].label;

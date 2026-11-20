@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIcon, Avatar, YText } from '@/components/ui';
-import { activityMeta, colors, spacing, type, ActivityType } from '@/design/tokens';
+import { spacing, type, ActivityType, Colors } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
 import { Person, Room } from '@/types';
 import { useDemo } from '@/stores/demo-store';
@@ -22,7 +23,7 @@ type Signal = {
   actionLabel: string;
 };
 
-export default function ActivityScreen() {
+export default function ActivityScreen() { const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { me, people, rooms, availability } = useDemo();
@@ -57,8 +58,8 @@ export default function ActivityScreen() {
   </ScrollView></View>;
 }
 
-function SignalSpotlight({ signal, onPress }: { signal: Signal; onPress: () => void }) {
-  const accent = signal.activity ? activityMeta[signal.activity].color : colors.brand;
+function SignalSpotlight({ signal, onPress }: { signal: Signal; onPress: () => void }) { const { colors, activityMeta } = useTheme(); const styles = useThemedStyles(makeStyles);
+  const accent = signal.activity ? activityMeta[signal.activity].color : colors.brandText;
   return <Pressable accessibilityRole="button" accessibilityLabel={signal.actionLabel} onPress={onPress} style={({ pressed }) => [styles.spotlight, pressed && styles.spotlightPressed]}>
     <View style={styles.spotlightTop}><View style={styles.signalType}><ActivityIcon activity={signal.activity ?? 'availability'} size={44} /><YText style={[styles.kicker, { color: accent }]}>{copy.activity.fresh}</YText></View><View style={[styles.signalMark, { backgroundColor: accent }]}><Ionicons name="arrow-up" size={18} color={colors.brandInk} /></View></View>
     <YText style={styles.spotlightTitle}>{signal.title}</YText>
@@ -67,14 +68,14 @@ function SignalSpotlight({ signal, onPress }: { signal: Signal; onPress: () => v
   </Pressable>;
 }
 
-function SignalRow({ signal, onPress }: { signal: Signal; onPress: () => void }) {
-  const accent = signal.activity ? activityMeta[signal.activity].color : colors.brand;
+function SignalRow({ signal, onPress }: { signal: Signal; onPress: () => void }) { const { colors, activityMeta } = useTheme(); const styles = useThemedStyles(makeStyles);
+  const accent = signal.activity ? activityMeta[signal.activity].color : colors.brandText;
   return <Pressable accessibilityRole="button" accessibilityLabel={signal.actionLabel} onPress={onPress} style={({ pressed }) => [styles.signalRow, pressed && styles.signalRowPressed]}>
     <ActivityIcon activity={signal.activity ?? 'availability'} size={38} /><View style={styles.signalCopy}><YText style={styles.signalTitle}>{signal.title}</YText><YText style={styles.signalDetail}>{signal.detail}</YText></View><Ionicons name="arrow-forward" size={17} color={accent} />
   </Pressable>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.canvas },
   content: { paddingHorizontal: spacing.xl },
   intro: { color: colors.muted, fontSize: 15, lineHeight: 20, fontWeight: '600', marginTop: 6 },

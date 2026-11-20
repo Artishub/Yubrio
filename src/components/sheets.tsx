@@ -3,7 +3,8 @@ import { Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, 
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ActionButton, ActivityIcon, YText } from '@/components/ui';
-import { ActivityType, activityMeta, colors, radius, spacing, type } from '@/design/tokens';
+import { ActivityType, radius, spacing, type, Colors } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 import { Circle, Person, Room } from '@/types';
 import { people as seededPeople } from '@/data/demo';
 import { availabilityWindow, isValidClockTime } from '@/lib/validation/rules';
@@ -11,7 +12,7 @@ import { availabilityWindow, isValidClockTime } from '@/lib/validation/rules';
 const activities: ActivityType[] = ['coffee', 'drinks', 'food', 'walk', 'gaming', 'gym', 'hangout', 'custom'];
 const durations = ['1 hour', '3 hours', '6 hours', 'All day', 'Custom'];
 
-function SheetShell({ visible, children, onClose, footer }: { visible: boolean; children: React.ReactNode; onClose: () => void; footer?: React.ReactNode }) {
+function SheetShell({ visible, children, onClose, footer }: { visible: boolean; children: React.ReactNode; onClose: () => void; footer?: React.ReactNode }) { const sheetStyles = useThemedStyles(makeSheetStyles);
   return <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
     <View style={sheetStyles.backdrop}>
       <Pressable accessibilityRole="button" accessibilityLabel="Close sheet" onPress={onClose} style={StyleSheet.absoluteFill} />
@@ -24,7 +25,7 @@ function SheetShell({ visible, children, onClose, footer }: { visible: boolean; 
   </Modal>;
 }
 
-export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjom', circles = [], people = seededPeople, withFriendId }: { visible: boolean; onClose: () => void; onCreate: (room: Room) => void; creatorId?: string; circles?: Circle[]; people?: Person[]; withFriendId?: string }) {
+export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjom', circles = [], people = seededPeople, withFriendId }: { visible: boolean; onClose: () => void; onCreate: (room: Room) => void; creatorId?: string; circles?: Circle[]; people?: Person[]; withFriendId?: string }) { const { colors, activityMeta } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
   const [step, setStep] = useState(0);
   const [activity, setActivity] = useState<ActivityType>('drinks');
   const [when, setWhen] = useState('Now');
@@ -142,7 +143,7 @@ export function CreateRoomSheet({ visible, onClose, onCreate, creatorId = 'artjo
   </Modal>;
 }
 
-export function AvailabilitySheet({ visible, onClose, onPublish, people = seededPeople, circles = [], excludePersonId }: { visible: boolean; onClose: () => void; onPublish: (duration: string, note: string, audience: string, audienceIds: string[], canMessage: boolean, times: { startsAt: number; expiresAt: number } | null) => void | Promise<void>; people?: Person[]; circles?: Circle[]; excludePersonId?: string }) {
+export function AvailabilitySheet({ visible, onClose, onPublish, people = seededPeople, circles = [], excludePersonId }: { visible: boolean; onClose: () => void; onPublish: (duration: string, note: string, audience: string, audienceIds: string[], canMessage: boolean, times: { startsAt: number; expiresAt: number } | null) => void | Promise<void>; people?: Person[]; circles?: Circle[]; excludePersonId?: string }) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
   const [when, setWhen] = useState('Now');
   const [from, setFrom] = useState('');
   const [until, setUntil] = useState('');
@@ -178,15 +179,15 @@ export function AvailabilitySheet({ visible, onClose, onPublish, people = seeded
   </SheetShell>;
 }
 
-function PersonPicker({ people, selectedIds, onToggle }: { people: Person[]; selectedIds: string[]; onToggle: (id: string) => void }) {
-  return <View style={sheetStyles.personPicker}><YText style={sheetStyles.helper}>{selectedIds.length ? `${selectedIds.length} selected` : 'Pick the friends who should see this.'}</YText>{people.length ? people.slice(0, 6).map((person) => { const selected = selectedIds.includes(person.id); return <Pressable key={person.id} accessibilityRole="checkbox" accessibilityState={{ checked: selected }} onPress={() => onToggle(person.id)} style={sheetStyles.personChoice}><YText style={sheetStyles.personChoiceName}>{person.name}</YText><Ionicons name={selected ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={selected ? colors.brand : colors.faint} /></Pressable>; }) : <YText style={sheetStyles.helper}>Add a friend first, then you can choose them here.</YText>}</View>;
+function PersonPicker({ people, selectedIds, onToggle }: { people: Person[]; selectedIds: string[]; onToggle: (id: string) => void }) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
+  return <View style={sheetStyles.personPicker}><YText style={sheetStyles.helper}>{selectedIds.length ? `${selectedIds.length} selected` : 'Pick the friends who should see this.'}</YText>{people.length ? people.slice(0, 6).map((person) => { const selected = selectedIds.includes(person.id); return <Pressable key={person.id} accessibilityRole="checkbox" accessibilityState={{ checked: selected }} onPress={() => onToggle(person.id)} style={sheetStyles.personChoice}><YText style={sheetStyles.personChoiceName}>{person.name}</YText><Ionicons name={selected ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={selected ? colors.brandText : colors.faint} /></Pressable>; }) : <YText style={sheetStyles.helper}>Add a friend first, then you can choose them here.</YText>}</View>;
 }
 
-function CirclePicker({ circles, selectedIds, onToggle }: { circles: Circle[]; selectedIds: string[]; onToggle: (id: string) => void }) {
-  return <View style={sheetStyles.personPicker}><YText style={sheetStyles.helper}>{selectedIds.length ? `${selectedIds.length} selected` : 'Pick one or more circles.'}</YText>{circles.map((circle) => { const selected = selectedIds.includes(circle.id); return <Pressable key={circle.id} accessibilityRole="checkbox" accessibilityLabel={`Circle ${circle.name}`} accessibilityState={{ checked: selected }} onPress={() => onToggle(circle.id)} style={sheetStyles.circleChoice}><View style={sheetStyles.circleChoiceIcon}><Ionicons name="people-outline" size={17} color={selected ? colors.brandInk : colors.muted} /></View><View style={sheetStyles.circleChoiceCopy}><YText style={sheetStyles.circleChoiceName}>{circle.name}</YText><YText style={sheetStyles.circleChoiceCount}>{circle.memberIds.length} {circle.memberIds.length === 1 ? 'friend' : 'friends'}</YText></View><Ionicons name={selected ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={selected ? colors.brand : colors.faint} /></Pressable>; })}</View>;
+function CirclePicker({ circles, selectedIds, onToggle }: { circles: Circle[]; selectedIds: string[]; onToggle: (id: string) => void }) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
+  return <View style={sheetStyles.personPicker}><YText style={sheetStyles.helper}>{selectedIds.length ? `${selectedIds.length} selected` : 'Pick one or more circles.'}</YText>{circles.map((circle) => { const selected = selectedIds.includes(circle.id); return <Pressable key={circle.id} accessibilityRole="checkbox" accessibilityLabel={`Circle ${circle.name}`} accessibilityState={{ checked: selected }} onPress={() => onToggle(circle.id)} style={sheetStyles.circleChoice}><View style={sheetStyles.circleChoiceIcon}><Ionicons name="people-outline" size={17} color={selected ? colors.brandInk : colors.muted} /></View><View style={sheetStyles.circleChoiceCopy}><YText style={sheetStyles.circleChoiceName}>{circle.name}</YText><YText style={sheetStyles.circleChoiceCount}>{circle.memberIds.length} {circle.memberIds.length === 1 ? 'friend' : 'friends'}</YText></View><Ionicons name={selected ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={selected ? colors.brandText : colors.faint} /></Pressable>; })}</View>;
 }
 
-function OptionRow({ icon, title, description, value, onChange }: { icon: keyof typeof Ionicons.glyphMap; title: string; description: string; value: boolean; onChange: (value: boolean) => void }) {
+function OptionRow({ icon, title, description, value, onChange }: { icon: keyof typeof Ionicons.glyphMap; title: string; description: string; value: boolean; onChange: (value: boolean) => void }) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
   return <Pressable accessibilityRole="switch" accessibilityLabel={title} accessibilityHint={description} accessibilityState={{ checked: value }} onPress={() => onChange(!value)} style={sheetStyles.optionLine}>
       <View style={sheetStyles.optionIcon}><Ionicons name={icon} size={18} color={colors.ink} /></View>
       <View style={sheetStyles.optionCopy}><YText style={sheetStyles.optionTitle}>{title}</YText><YText style={sheetStyles.helper}>{description}</YText></View>
@@ -194,11 +195,11 @@ function OptionRow({ icon, title, description, value, onChange }: { icon: keyof 
   </Pressable>;
 }
 
-function YTextInput({ label, ...props }: { label: string } & React.ComponentProps<typeof TextInput>) {
+function YTextInput({ label, ...props }: { label: string } & React.ComponentProps<typeof TextInput>) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
   return <View style={sheetStyles.inputWrap}><YText style={sheetStyles.inputLabel}>{label}</YText><TextInput {...props} accessibilityLabel={props.accessibilityLabel ?? label} style={[sheetStyles.input, props.multiline && sheetStyles.multilineInput]} placeholderTextColor={colors.faint} /></View>;
 }
 
-function ChoiceRow({ label, options, value, onChange, wrap = false }: { label: string; options: string[]; value: string; onChange: (value: string) => void; wrap?: boolean }) {
+function ChoiceRow({ label, options, value, onChange, wrap = false }: { label: string; options: string[]; value: string; onChange: (value: string) => void; wrap?: boolean }) { const { colors } = useTheme(); const sheetStyles = useThemedStyles(makeSheetStyles);
   const choices = options.map((item) => <Pressable key={item} accessibilityRole="radio" accessibilityLabel={`${label}: ${item}`} accessibilityState={{ selected: value === item }} onPress={() => onChange(item)} style={({ pressed }) => [sheetStyles.choiceChip, value === item && sheetStyles.choiceChipSelected, pressed && sheetStyles.choicePressed]}><YText style={[sheetStyles.choiceChipText, value === item && { color: colors.brandInk }]}>{item}</YText></Pressable>);
   return <View style={sheetStyles.choiceRow}><YText style={sheetStyles.inputLabel}>{label}</YText>{wrap ? <View style={sheetStyles.choiceListWrap}>{choices}</View> : <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={sheetStyles.choiceList}>{choices}</ScrollView>}</View>;
 }
@@ -221,7 +222,7 @@ function formatTime(date: Date) { return date.toLocaleTimeString([], { hour: '2-
 function formatRoomTime(start: Date, end: Date) { const startDay = formatDay(start); const endDay = formatDay(end); return start.toDateString() === end.toDateString() ? `${startDay} · ${formatTime(start)}–${formatTime(end)}` : `${startDay} ${formatTime(start)}–${endDay} ${formatTime(end)}`; }
 function formatDay(date: Date) { const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()); const daysAway = Math.round((target.getTime() - today.getTime()) / 86400000); if (daysAway === 0) return 'Today'; if (daysAway === 1) return 'Tomorrow'; return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }); }
 
-const sheetStyles = StyleSheet.create({
+const makeSheetStyles = (colors: Colors) => StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlay },
   sheet: { backgroundColor: colors.canvas, borderTopLeftRadius: radius.sheet, borderTopRightRadius: radius.sheet, borderTopWidth: 1, borderColor: colors.glassBorder, paddingHorizontal: spacing.xxl, paddingTop: 10, paddingBottom: 28, minHeight: 440, maxHeight: '96%' },
   scrollContent: { paddingBottom: 6 }, footerScrollContent: { paddingBottom: spacing.md }, creationContent: { paddingBottom: 6 },
