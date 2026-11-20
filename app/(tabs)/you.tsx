@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActionButton, Avatar, SectionTitle, YText } from '@/components/ui';
+import { useRouter } from 'expo-router';
+import { ActionButton, ActivityIcon, Avatar, SectionTitle, YText } from '@/components/ui';
 import { AvailabilitySheet } from '@/components/sheets';
 import { colors, radius, spacing, type } from '@/design/tokens';
 import { useDemo } from '@/stores/demo-store';
 import { useAuth } from '@/stores/auth-store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { displayName } from '@/utils/display-name';
+import { displayName, displayTitle } from '@/utils/display-name';
 import { formatAvailabilityTime, isAvailabilityUpcoming } from '@/lib/validation/rules';
 import { getPushPermissionStatus, registerForPushNotificationsAsync } from '@/lib/notifications/register';
 import { persistPushToken } from '@/lib/supabase/repositories';
@@ -33,12 +34,14 @@ export default function YouScreen() {
   const [pushStatus, setPushStatus] = useState<PushPermissionStatus>('unknown');
   const [pushPending, setPushPending] = useState(false);
   const [pushError, setPushError] = useState('');
-  const { me, people, circles, availability, publishAvailability, clearAvailability, updateProfile } = useDemo();
+  const router = useRouter();
+  const { me, people, circles, rooms, availability, publishAvailability, clearAvailability, updateProfile } = useDemo();
   const { session, signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const currentUser = me;
   const handle = currentUser.id === 'artjom' ? 'artjom' : currentUser.name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 20) || 'friend';
   const currentAvailability = availability.find((item) => item.personId === currentUser.id);
+  const myRooms = rooms.filter((room) => room.joined || room.creatorId === currentUser.id);
 
   const openProfile = () => { setProfileName(currentUser.name); setProfileError(''); setProfileOpen(true); };
   const saveProfile = async () => {
@@ -112,6 +115,12 @@ export default function YouScreen() {
         <ActionButton label="I’m free" icon="radio-button-on" onPress={() => setFreeOpen(true)} style={{ marginTop: spacing.xl }} />
       </>}
     </View>
+    <View style={styles.sectionGap} /><SectionTitle>Your rooms</SectionTitle>
+    {myRooms.length ? <View style={styles.settings}>{myRooms.map((room) => <Pressable key={room.id} accessibilityRole="button" accessibilityLabel={`Open ${displayTitle(room.title)}`} onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })} style={({ pressed }) => [styles.settingRow, pressed && styles.rowPressed]}>
+      <ActivityIcon activity={room.activity} size={38} />
+      <View style={styles.settingCopy}><YText style={styles.settingTitle} numberOfLines={1}>{displayTitle(room.title)}</YText><YText style={styles.settingDescription} numberOfLines={1}>{room.time} · {room.creatorId === currentUser.id ? 'You opened it' : 'You’re in'}</YText></View>
+      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+    </Pressable>)}</View> : <View style={styles.roomsEmpty}><YText style={styles.availabilityCopy}>Nothing planned yet. Rooms you open or join show up here.</YText><ActionButton label="Open a room" icon="add" variant="secondary" onPress={() => router.push('/(tabs)/create')} style={{ marginTop: spacing.lg }} /></View>}
     <View style={styles.sectionGap} /><SectionTitle>Preferences</SectionTitle>
     <View style={styles.settings}>
       <Pressable accessibilityRole="button" accessibilityLabel="Notification preferences" onPress={() => setNotificationsOpen(true)} style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="notifications-outline" size={19} color={colors.ink} /></View><View style={styles.settingCopy}><YText style={styles.settingTitle}>Notifications</YText><YText style={styles.settingDescription}>Keep up with the good stuff</YText></View><Ionicons name="chevron-forward" size={18} color={colors.faint} /></Pressable>
@@ -125,6 +134,7 @@ function formatAvailabilityDuration(duration: string) { return duration === 'Tod
 function audienceLabel(audience?: string) { if (audience === 'circle' || audience === 'Choose circles') return 'your circles'; if (audience === 'people' || audience === 'Choose people') return 'selected friends'; return 'everyone'; }
 
 const styles = StyleSheet.create({
+  rowPressed: { opacity: 0.7 }, roomsEmpty: { marginTop: spacing.sm },
   root: { flex: 1, backgroundColor: colors.canvas }, content: { paddingTop: 48, paddingHorizontal: spacing.xl, paddingBottom: 125 }, kicker: { ...type.label, color: colors.muted, marginBottom: 8 }, profile: { flexDirection: 'row', alignItems: 'center', gap: 15, marginTop: 22, marginBottom: 26 }, profileCopy: { flex: 1 }, name: { fontSize: 20, fontWeight: '800' }, handle: { color: colors.muted, fontSize: 14, fontWeight: '600', marginTop: 2 }, editButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.glassBorder, alignItems: 'center', justifyContent: 'center' }, disabledAction: { opacity: 0.5 },
   availability: { backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.xl, borderWidth: 1, borderColor: colors.glassBorder }, availabilityTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, signal: { flexDirection: 'row', alignItems: 'center', gap: 7 }, signalDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.brand }, signalText: { color: colors.brand, fontSize: 13, fontWeight: '800' }, expires: { color: colors.muted, fontSize: 12, fontWeight: '700' }, availabilityTitle: { fontSize: 24, fontWeight: '800', color: colors.ink, marginTop: 22 }, availabilityCopy: { color: colors.muted, fontWeight: '600', fontSize: 13, lineHeight: 19, marginTop: 6 }, availabilityActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.lg }, changeButton: { flex: 1 }, endButton: { minHeight: 50, paddingHorizontal: spacing.md, alignItems: 'center', justifyContent: 'center' }, endText: { color: colors.muted, fontSize: 13, fontWeight: '800' }, error: { color: colors.error, fontSize: 13, lineHeight: 18, fontWeight: '700', marginTop: spacing.md }, quietIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.glassHighlight, alignItems: 'center', justifyContent: 'center' }, sectionGap: { height: 28 }, settings: { backgroundColor: 'transparent', paddingHorizontal: 0, borderTopWidth: 1, borderTopColor: colors.line }, settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.line }, settingIcon: { width: 36, height: 36, borderRadius: 11, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, settingCopy: { flex: 1 }, settingTitle: { fontSize: 14, fontWeight: '800' }, settingDescription: { fontSize: 12, color: colors.muted, fontWeight: '600', marginTop: 2 }, version: { textAlign: 'center', color: colors.faint, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginTop: 28 },
   preferenceBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlay }, preferenceSheet: { backgroundColor: colors.canvas, borderTopLeftRadius: radius.sheet, borderTopRightRadius: radius.sheet, padding: spacing.xxl, paddingBottom: 34 }, modalTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.lg }, modalClose: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, preferenceIntro: { color: colors.muted, fontSize: 14, lineHeight: 20, fontWeight: '600', marginBottom: spacing.lg }, profileInput: { minHeight: 54, backgroundColor: colors.surface, borderRadius: radius.button, borderWidth: 1, borderColor: colors.line, paddingHorizontal: 16, color: colors.ink, fontSize: 16 }, preferenceList: { backgroundColor: colors.surface, borderRadius: radius.card, paddingHorizontal: spacing.lg }, preferenceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 }, preferenceDone: { minHeight: 52, borderRadius: radius.button, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg }, preferenceDoneText: { color: colors.brandInk, fontSize: 16, fontWeight: '900' }, pushRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radius.card, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.glassBorder, marginBottom: spacing.lg }, pushIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' }, pushEnable: { minHeight: 38, paddingHorizontal: 13, borderRadius: 12, backgroundColor: colors.brand, borderBottomWidth: 3, borderBottomColor: colors.brandPressed, alignItems: 'center', justifyContent: 'center' }, pushEnablePressed: { transform: [{ translateY: 2 }], borderBottomWidth: 1 }, pushEnableText: { color: colors.brandInk, fontSize: 12, fontWeight: '900' }, pushEnabled: { width: 30, height: 30, borderRadius: 10, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' },
