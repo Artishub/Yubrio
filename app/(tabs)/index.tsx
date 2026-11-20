@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { demoQuickReply, demoReplyDelayMs } from '@/data/demo';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, StyleSheet, TextInput, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ActionButton, Avatar, SectionTitle, YText } from '@/components/ui';
 import { FreeFriends, FreeStatus } from '@/components/home-status';
 import { RoomRow } from '@/components/room-row';
+import { StretchOnScroll, useStretchScroll } from '@/components/stretch-on-scroll';
+import Animated from 'react-native-reanimated';
 import { displayName } from '@/utils/display-name';
 import { AvailabilitySheet } from '@/components/sheets';
 import { spacing, type, Colors } from '@/design/tokens';
@@ -57,6 +59,9 @@ export default function HomeScreen() { const { colors } = useTheme(); const styl
     return subscribeToHome(me.id, () => { void queryClient.invalidateQueries({ queryKey: ['home'] }); });
   }, [me.id, remoteActive]);
 
+  const { scrollY, onScroll } = useStretchScroll();
+  const { height } = useWindowDimensions();
+  const edges = { scrollY, top: insets.top, bottom: height - insets.bottom - tabBarSpace };
   const mine = liveAvailability.find((item) => item.personId === me.id);
   const freeFriends = visibleAvailability.flatMap((item) => {
     const person = people.find((candidate) => candidate.id === item.personId);
@@ -69,44 +74,47 @@ export default function HomeScreen() { const { colors } = useTheme(); const styl
   };
 
   return <View style={styles.root}>
-    <ScrollView showsVerticalScrollIndicator={false} refreshControl={remoteActive ? <RefreshControl refreshing={refreshing} onRefresh={() => void refreshHome()} tintColor={colors.brandText} colors={[colors.brandText]} progressBackgroundColor={colors.surface} /> : undefined} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 110 }]}>
+    <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} refreshControl={remoteActive ? <RefreshControl refreshing={refreshing} onRefresh={() => void refreshHome()} tintColor={colors.brandText} colors={[colors.brandText]} progressBackgroundColor={colors.surface} /> : undefined} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + tabBarSpace + spacing.xl }]}>
       <View style={styles.header}>
         <YText style={[type.title, styles.greeting]} numberOfLines={1}>{copy.home.greeting} {displayName(me.name)}</YText>
         <Pressable accessibilityRole="button" accessibilityLabel="Your profile and settings" onPress={() => router.push('/you')} style={({ pressed }) => pressed && styles.pressed}><Avatar person={me} size={44} /></Pressable>
       </View>
 
-      <FreeStatus
+      <StretchOnScroll {...edges}><FreeStatus
         mine={mine}
         pending={freePending}
         onFreeNow={() => changeFree(() => publishAvailability({ id: `free-${Date.now()}`, personId: me.id, expiresIn: '3h left', note: '', canMessage: true, audience: 'Everyone', audienceIds: [] }))}
         onOptions={() => setFreeOpen(true)}
         onEnd={() => changeFree(() => clearAvailability(me.id))}
-      />
+      /></StretchOnScroll>
 
       {remoteLoading && <View accessibilityRole="progressbar" style={styles.status}><ActivityIndicator size="small" color={colors.brandText} /><YText style={styles.statusText}>Loading your people…</YText></View>}
       {remoteError && <Pressable accessibilityRole="button" accessibilityLabel="Retry loading your people" onPress={retryHome} style={styles.errorStatus}><Ionicons name="cloud-offline-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>Couldn’t load your people. Tap to retry.</YText></Pressable>}
       {actionError ? <Pressable accessibilityRole="button" accessibilityLabel="Dismiss error" onPress={() => setActionError('')} style={styles.errorStatus}><Ionicons name="warning-outline" size={18} color={colors.error} /><YText style={styles.errorStatusText}>{actionError}</YText></Pressable> : null}
 
-      <View style={styles.section}>
+      <StretchOnScroll {...edges}><View style={styles.section}>
         <SectionTitle>{copy.home.friendsAvailable}</SectionTitle>
         <FreeFriends friends={freeFriends} onPress={(friend) => setMessageFor({ id: friend.availabilityId, personId: friend.person.id, name: friend.person.name })} />
-      </View>
+      </View></StretchOnScroll>
 
       <View style={styles.section}>
         <SectionTitle>{copy.home.rooms}</SectionTitle>
         {rooms.length ? <View style={styles.roomList}>{rooms.map((room) => {
           const memberIds = room.joined && !room.people.includes(me.id) ? [me.id, ...room.people] : room.people;
           const members = memberIds.flatMap((id) => people.find((person) => person.id === id) ?? (id === me.id ? me : []));
-          return <RoomRow key={room.id} room={room} people={members} onOpen={() => openRoom(room.id)} onYeb={() => void joinRoomFromHome(room.id)} />;
+          return <StretchOnScroll key={room.id} {...edges}><RoomRow room={room} people={members} onOpen={() => openRoom(room.id)} onYeb={() => void joinRoomFromHome(room.id)} /></StretchOnScroll>;
         })}</View> : !remoteLoading && <View style={styles.empty}>
           <YText style={styles.emptyTitle}>{copy.home.quietTitle}</YText>
           <YText style={styles.emptyCopy}>{copy.home.quietCopy}</YText>
           <ActionButton label={copy.home.openRoom} icon="add" onPress={() => router.push('/(tabs)/create')} style={styles.emptyAction} />
         </View>}
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
     {freeOpen && <AvailabilitySheet visible onClose={() => setFreeOpen(false)} excludePersonId={currentUser.id} people={people} circles={circles} onPublish={(duration, note, audience, audienceIds, canMessage, times) => publishAvailability({ id: `free-${Date.now()}`, personId: currentUser.id, expiresIn: formatAvailabilityDuration(duration), note, canMessage, audience, audienceIds, ...times })} />}{messageFor && <QuickMessageSheet availabilityId={messageFor.id} personId={messageFor.personId} name={messageFor.name} remoteActive={remoteActive} onClose={() => setMessageFor(null)} onSuggest={() => { const friendId = messageFor.personId; setMessageFor(null); router.push({ pathname: '/(tabs)/create', params: { with: friendId } }); }} />}</View>;
 }
+
+// Height the floating tab bar covers at the bottom of the screen.
+const tabBarSpace = 88;
 
 type QuickMessage = { id: string; body: string; pending?: boolean; mine?: boolean };
 

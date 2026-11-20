@@ -95,7 +95,11 @@ export type Scheme = keyof typeof palettes;
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32, huge: 40 };
 export const radius = { card: 20, sheet: 30, button: 14, icon: 14, chip: 999 };
-export const motion = { celebration: 480 };
+export const motion = {
+  celebration: 480,
+  // How far a block is stretched, squeezed, blurred (px), dimmed and faded when fully past a list edge.
+  stretch: { stretch: 0.3, squeeze: 0.06, blur: 20, dim: 0.25, fade: 0.5 },
+};
 export const shadowCard = (colors: Colors) => ({ boxShadow: `0px 8px 16px ${colors.shadow}`, elevation: 3 });
 export const type = {
   title: { fontSize: 34, lineHeight: 38, fontWeight: '800' as const, letterSpacing: -1.4 },
