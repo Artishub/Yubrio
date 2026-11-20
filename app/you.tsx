@@ -3,10 +3,11 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleShee
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { Backdrop } from '@/components/backdrop';
 import { ActionButton, ActivityIcon, Avatar, SectionTitle, YText } from '@/components/ui';
 import { AvailabilitySheet } from '@/components/sheets';
-import { radius, spacing, type, Colors } from '@/design/tokens';
-import { ThemeMode, useTheme, useThemedStyles } from '@/design/theme';
+import { radius, spacing, type, Colors, Scheme } from '@/design/tokens';
+import { useTheme, useThemedStyles } from '@/design/theme';
 import { useDemo } from '@/stores/demo-store';
 import { useAuth } from '@/stores/auth-store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +21,7 @@ type NotificationPreferences = { availability: boolean; rooms: boolean; chat: bo
 type PushPermissionStatus = 'granted' | 'denied' | 'undetermined' | 'needs_setup' | 'unavailable' | 'unknown';
 const defaultNotificationPreferences: NotificationPreferences = { availability: true, rooms: true, chat: true };
 
-export default function YouScreen() { const { colors, mode, setMode } = useTheme(); const styles = useThemedStyles(makeStyles);
+export default function YouScreen() { const { colors, scheme, setScheme } = useTheme(); const styles = useThemedStyles(makeStyles);
   const [freeOpen, setFreeOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -100,7 +101,7 @@ export default function YouScreen() { const { colors, mode, setMode } = useTheme
     }
   };
 
-  return <View style={styles.root}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 40 }]}>
+  return <View style={styles.root}><Backdrop /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + 40 }]}>
     <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/(tabs)'); }} style={styles.backButton}><Ionicons name="arrow-back" size={21} color={colors.ink} /></Pressable>
     <YText style={type.title}>You</YText>
     <View style={styles.profile}><Avatar person={currentUser} size={68} /><View style={styles.profileCopy}><YText style={styles.name}>{displayName(currentUser.name)}</YText><YText style={styles.handle}>@{handle}</YText></View><Pressable accessibilityRole="button" accessibilityLabel="Edit profile" onPress={openProfile} style={styles.editButton}><Ionicons name="create" size={21} color={colors.brandText} /></Pressable></View>
@@ -125,7 +126,7 @@ export default function YouScreen() { const { colors, mode, setMode } = useTheme
     </Pressable>)}</View> : <View style={styles.roomsEmpty}><YText style={styles.availabilityCopy}>Nothing planned yet. Rooms you open or join show up here.</YText><ActionButton label="Open a room" icon="add" variant="secondary" onPress={() => router.push('/(tabs)/create')} style={{ marginTop: spacing.lg }} /></View>}
     <View style={styles.sectionGap} /><SectionTitle>Preferences</SectionTitle>
     <View style={styles.settings}>
-      <View style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="contrast-outline" size={19} color={colors.ink} /></View><View style={styles.settingCopy}><YText style={styles.settingTitle}>Appearance</YText></View><View accessibilityRole="radiogroup" style={styles.modeRow}>{themeModes.map((item) => <Pressable key={item.mode} accessibilityRole="radio" accessibilityLabel={`Appearance: ${item.label}`} accessibilityState={{ selected: mode === item.mode }} onPress={() => setMode(item.mode)} style={[styles.modeChip, mode === item.mode && styles.modeChipSelected]}><YText style={[styles.modeText, mode === item.mode && styles.modeTextSelected]}>{item.label}</YText></Pressable>)}</View></View>
+      <View style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="contrast-outline" size={19} color={colors.ink} /></View><View style={styles.settingCopy}><YText style={styles.settingTitle}>Appearance</YText></View><View accessibilityRole="radiogroup" style={styles.modeRow}>{themeChoices.map((item) => <Pressable key={item.scheme} accessibilityRole="radio" accessibilityLabel={`Appearance: ${item.label}`} accessibilityState={{ selected: scheme === item.scheme }} onPress={() => setScheme(item.scheme)} style={[styles.modeChip, scheme === item.scheme && styles.modeChipSelected]}><YText style={[styles.modeText, scheme === item.scheme && styles.modeTextSelected]}>{item.label}</YText></Pressable>)}</View></View>
       <Pressable accessibilityRole="button" accessibilityLabel="Notification preferences" onPress={() => setNotificationsOpen(true)} style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="notifications-outline" size={19} color={colors.ink} /></View><View style={styles.settingCopy}><YText style={styles.settingTitle}>Notifications</YText><YText style={styles.settingDescription}>Keep up with the good stuff</YText></View><Ionicons name="chevron-forward" size={18} color={colors.faint} /></Pressable>
       {session && <Pressable accessibilityRole="button" accessibilityLabel="Sign out" disabled={signingOut} onPress={() => { setSigningOut(true); setAccountError(''); void signOut().catch(() => setAccountError('Couldn’t sign out. Try again.')).finally(() => setSigningOut(false)); }} style={[styles.settingRow, signingOut && styles.disabledAction]}><View style={styles.settingIcon}><Ionicons name="log-out-outline" size={19} color={colors.muted} /></View><View style={styles.settingCopy}><YText style={styles.settingTitle}>{signingOut ? 'Signing out…' : 'Sign out'}</YText><YText style={styles.settingDescription}>You can come back anytime</YText></View></Pressable>}
     </View>
@@ -136,7 +137,7 @@ export default function YouScreen() { const { colors, mode, setMode } = useTheme
 function formatAvailabilityDuration(duration: string) { return duration === 'Today' ? 'until tonight' : `${duration} left`; }
 function audienceLabel(audience?: string) { if (audience === 'circle' || audience === 'Choose circles') return 'your circles'; if (audience === 'people' || audience === 'Choose people') return 'selected friends'; return 'everyone'; }
 
-const themeModes: { mode: ThemeMode; label: string }[] = [{ mode: 'system', label: 'Auto' }, { mode: 'light', label: 'Light' }, { mode: 'dark', label: 'Dark' }];
+const themeChoices: { scheme: Scheme; label: string }[] = [{ scheme: 'dark', label: 'Dark' }, { scheme: 'glass', label: 'Glass' }];
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
   backButton: { width: 44, height: 44, borderRadius: 15, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.glassBorder, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.lg },

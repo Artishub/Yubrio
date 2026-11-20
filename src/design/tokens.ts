@@ -1,57 +1,6 @@
-const light = {
-  canvas: '#FFF6E5',
-  surface: '#FFFFFF',
-  surfaceMuted: '#F3E8D2',
-  surfaceStrong: '#FFFFFF',
-  glassSurface: '#FFFFFF',
-  glassWeb: '#FFFFFF',
-  glassBorder: '#1A1A1A',
-  glassHighlight: '#F3E8D2',
-  ink: '#1A1A1A',
-  muted: '#5E574C',
-  faint: '#9A9184',
-  line: '#E4D8C0',
-  // Sticker edges and hard shadows.
-  outline: '#1A1A1A',
-  // The white a sticker is cut from, same in both modes.
-  paper: '#FFFDF7',
-  brand: '#D4FF3A',
-  brandPressed: '#B6E01C',
-  brandInk: '#1A1A1A',
-  brandWash: 'rgba(212, 255, 58, 0.35)',
-  brandText: '#2E7A00',
-  electric: '#4458E0',
-  violet: '#7B4FD6',
-  sky: '#0E8FA3',
-  coral: '#E0452F',
-  // Activity fills are the same in both modes; text on them is always `onColor`.
-  coffee: '#FFB547',
-  drinks: '#FF6F61',
-  food: '#FF9148',
-  gaming: '#A88BFF',
-  walk: '#5FD4E6',
-  gym: '#8FE063',
-  hangout: '#74A9FF',
-  custom: '#D8CFC0',
-  availability: '#D4FF3A',
-  onColor: '#1A1A1A',
-  error: '#C7352B',
-  overlay: 'rgba(26, 26, 26, 0.45)',
-  shadow: '#1A1A1A',
-  coffeeTint: '#FFE6BF',
-  drinksTint: '#FFD6D1',
-  foodTint: '#FFDDC4',
-  gamingTint: '#E5DBFF',
-  walkTint: '#CFF3F8',
-  gymTint: '#DDF6CE',
-  hangoutTint: '#D6E5FF',
-  customTint: '#F0EADF',
-  availabilityTint: '#F0FFBF',
-};
-
-export type Colors = typeof light;
-
-const dark: Colors = {
+const dark = {
+  // Solid outlines and hard shadows.
+  material: 'sticker' as 'sticker' | 'glass',
   canvas: '#211D19',
   surface: '#2E2924',
   surfaceMuted: '#3D3730',
@@ -75,7 +24,7 @@ const dark: Colors = {
   violet: '#BE9BFF',
   sky: '#72D9E5',
   coral: '#FF8A78',
-  // Activity fills are the same in both modes; text on them is always `onColor`.
+  // Text on an activity fill or on lime is always `onColor`.
   coffee: '#FFB547',
   drinks: '#FF6F61',
   food: '#FF9148',
@@ -100,7 +49,59 @@ const dark: Colors = {
   availabilityTint: '#3A4A12',
 };
 
-export const palettes = { dark, light };
+export type Colors = typeof dark;
+
+// The brighter mode: translucent panes with a light rim and soft shadow over a pastel backdrop.
+const glass: Colors = {
+  material: 'glass',
+  canvas: '#E7ECF6',
+  surface: 'rgba(255, 255, 255, 0.58)',
+  surfaceMuted: 'rgba(255, 255, 255, 0.38)',
+  surfaceStrong: 'rgba(255, 255, 255, 0.72)',
+  glassSurface: 'rgba(255, 255, 255, 0.58)',
+  glassWeb: 'rgba(255, 255, 255, 0.45)',
+  glassBorder: 'rgba(255, 255, 255, 0.9)',
+  glassHighlight: 'rgba(255, 255, 255, 0.5)',
+  ink: '#141A24',
+  muted: '#4A5466',
+  faint: '#8590A3',
+  line: 'rgba(20, 26, 36, 0.10)',
+  outline: 'rgba(255, 255, 255, 0.9)',
+  paper: 'rgba(255, 255, 255, 0.85)',
+  brand: '#CDF53A',
+  brandPressed: '#B2DC1E',
+  brandInk: '#141A24',
+  brandWash: 'rgba(205, 245, 58, 0.35)',
+  brandText: '#3B6E00',
+  electric: '#4458E0',
+  violet: '#7B4FD6',
+  sky: '#0E8FA3',
+  coral: '#E0452F',
+  coffee: 'rgba(255, 181, 71, 0.62)',
+  drinks: 'rgba(255, 111, 97, 0.58)',
+  food: 'rgba(255, 145, 72, 0.6)',
+  gaming: 'rgba(168, 139, 255, 0.6)',
+  walk: 'rgba(95, 212, 230, 0.6)',
+  gym: 'rgba(143, 224, 99, 0.6)',
+  hangout: 'rgba(116, 169, 255, 0.6)',
+  custom: 'rgba(255, 255, 255, 0.5)',
+  availability: 'rgba(205, 245, 58, 0.75)',
+  onColor: '#141A24',
+  error: '#C7352B',
+  overlay: 'rgba(20, 26, 36, 0.32)',
+  shadow: 'rgba(50, 70, 120, 0.18)',
+  coffeeTint: 'rgba(255, 181, 71, 0.3)',
+  drinksTint: 'rgba(255, 111, 97, 0.28)',
+  foodTint: 'rgba(255, 145, 72, 0.28)',
+  gamingTint: 'rgba(168, 139, 255, 0.3)',
+  walkTint: 'rgba(95, 212, 230, 0.3)',
+  gymTint: 'rgba(143, 224, 99, 0.3)',
+  hangoutTint: 'rgba(116, 169, 255, 0.3)',
+  customTint: 'rgba(255, 255, 255, 0.4)',
+  availabilityTint: 'rgba(205, 245, 58, 0.4)',
+};
+
+export const palettes = { dark, glass };
 export type Scheme = keyof typeof palettes;
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32, huge: 40 };
@@ -110,9 +111,12 @@ export const motion = {
   // How far a block is stretched, squeezed, blurred (px), dimmed and faded when fully past a list edge.
   stretch: { stretch: 0.3, squeeze: 0.06, blur: 20, dim: 0.25, fade: 0.5 },
 };
-// The sticker look: a solid outline and a hard shadow offset down-right.
-export const sticker = (colors: Colors, offset = 4) => ({ borderWidth: 2, borderColor: colors.outline, boxShadow: `${offset}px ${offset}px 0px ${colors.outline}` });
-export const shadowCard = (colors: Colors) => ({ boxShadow: `4px 4px 0px ${colors.shadow}`, elevation: 0 });
+// The edge of every card and button. Dark mode: a solid outline and a hard shadow offset
+// down-right. Glass mode: a light rim, a soft drop shadow and (on web) a blur of what is behind.
+export const sticker = (colors: Colors, offset = 4) => colors.material === 'glass'
+  ? { borderWidth: 1, borderColor: colors.outline, boxShadow: `0px ${offset * 2}px ${offset * 6}px ${colors.shadow}`, backdropFilter: 'blur(18px) saturate(160%)' }
+  : { borderWidth: 2, borderColor: colors.outline, boxShadow: `${offset}px ${offset}px 0px ${colors.outline}` };
+export const shadowCard = (colors: Colors) => ({ boxShadow: sticker(colors).boxShadow, elevation: 0 });
 // Round display face for titles and buttons; the file is already bold, so no extra weight.
 export const display = { fontFamily: 'Fredoka_700Bold', fontWeight: 'normal' as const };
 export const type = {
@@ -140,7 +144,7 @@ export const activityTypes = Object.keys(activityInfo) as ActivityType[];
 export const isActivityType = (value: string): value is ActivityType => value in activityInfo;
 
 export function activityMetaFor(colors: Colors) {
-  const entries = activityTypes.map((activity) => [activity, { ...activityInfo[activity], color: colors[activity], tint: colors[`${activity}Tint`] }] as const);
+  const entries = activityTypes.map((activity) => [activity, { ...activityInfo[activity], color: colors[activity], tint: colors[`${activity}Tint` as const] }] as const);
   return Object.fromEntries(entries) as Record<ActivityType, { label: string; icon: string; emoji: string; color: string; tint: string }>;
 }
 

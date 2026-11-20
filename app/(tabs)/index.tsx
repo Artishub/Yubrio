@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ActionButton, Avatar, SectionTitle, YText } from '@/components/ui';
 import { FreeFriends, FreeStatus } from '@/components/home-status';
 import { RoomRow } from '@/components/room-row';
+import { Backdrop } from '@/components/backdrop';
 import { StretchOnScroll, useStretchScroll } from '@/components/stretch-on-scroll';
 import Animated from 'react-native-reanimated';
 import { displayName } from '@/utils/display-name';
@@ -74,6 +75,7 @@ export default function HomeScreen() { const { colors } = useTheme(); const styl
   };
 
   return <View style={styles.root}>
+    <Backdrop />
     <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} refreshControl={remoteActive ? <RefreshControl refreshing={refreshing} onRefresh={() => void refreshHome()} tintColor={colors.brandText} colors={[colors.brandText]} progressBackgroundColor={colors.surface} /> : undefined} contentContainerStyle={[styles.content, { paddingTop: Math.max(32, insets.top + 12), paddingBottom: insets.bottom + tabBarSpace + spacing.xl }]}>
       <View style={styles.header}>
         <YText style={[type.title, styles.greeting]} numberOfLines={1}>{copy.home.greeting} {displayName(me.name)}</YText>

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { ActionButton, Avatar, PersonRow, SectionTitle, YText } from '@/components/ui';
 import { radius, spacing, type, Colors, display, sticker } from '@/design/tokens';
+import { Backdrop } from '@/components/backdrop';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { Circle, FriendRequest, Person } from '@/types';
 import { useDemo } from '@/stores/demo-store';
@@ -56,7 +57,7 @@ export default function FriendsScreen() { const { colors } = useTheme(); const s
       setResolvedRequests((current) => current.filter((id) => id !== request.id));
     }
   };
-  return <View style={styles.root}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(64, insets.top + 24), paddingBottom: insets.bottom + 110 }]}>
+  return <View style={styles.root}><Backdrop /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingTop: Math.max(64, insets.top + 24), paddingBottom: insets.bottom + 110 }]}>
     <View style={styles.header}><View><YText style={type.title}>Friends</YText></View><Pressable accessibilityRole="button" accessibilityLabel="Add friend" onPress={openAdd} style={({ pressed }) => [styles.addButton, pressed && styles.actionPressed]}><Ionicons name="person-add-outline" size={17} color={colors.brandInk} /><YText style={styles.addButtonText}>Add</YText></Pressable></View>
     {friendPeople.length ? <View style={[styles.friendSummary, { backgroundColor: 'transparent', borderRadius: 0, paddingHorizontal: 0, paddingVertical: 18, borderWidth: 0, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.glassBorder }]}><View style={styles.avatarStack}>{friendPeople.slice(0, 4).map((person, index) => <View key={person.id} style={{ marginLeft: index === 0 ? 0 : -8, zIndex: 4 - index }}><Avatar person={person} size={35} /></View>)}</View><View style={styles.summaryCopy}><YText style={styles.summaryTitle}>{friendPeople.length + ' friends on Yubrio'}</YText><YText style={styles.summaryDescription}>The good kind of close circle.</YText></View><Ionicons name="sparkles-outline" size={20} color={colors.brandText} /></View> : <EmptyFriendInvite onPress={openAdd} />}
     <SectionTitle>Circles</SectionTitle>

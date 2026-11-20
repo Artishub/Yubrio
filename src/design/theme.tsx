@@ -1,35 +1,30 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Scheme, activityMetaFor, palettes } from '@/design/tokens';
 
-export type ThemeMode = 'system' | Scheme;
 const themeModeKey = 'yubrio.theme-mode';
 
-type ThemeValue = { colors: Colors; activityMeta: ReturnType<typeof activityMetaFor>; scheme: Scheme; mode: ThemeMode; setMode: (mode: ThemeMode) => void };
+type ThemeValue = { colors: Colors; activityMeta: ReturnType<typeof activityMetaFor>; scheme: Scheme; setScheme: (scheme: Scheme) => void };
 const ThemeContext = createContext<ThemeValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const systemScheme = useColorScheme();
-  const [mode, setModeState] = useState<ThemeMode>('system');
+  const [scheme, setSchemeState] = useState<Scheme>('dark');
 
   useEffect(() => {
     void AsyncStorage.getItem(themeModeKey).then((saved) => {
-      if (saved === 'light' || saved === 'dark' || saved === 'system') setModeState(saved);
+      if (saved === 'dark' || saved === 'glass') setSchemeState(saved);
     }).catch(() => undefined);
   }, []);
 
   const value = useMemo<ThemeValue>(() => {
-    const scheme: Scheme = mode === 'system' ? (systemScheme === 'light' ? 'light' : 'dark') : mode;
     const colors = palettes[scheme];
     return {
       colors,
       activityMeta: activityMetaFor(colors),
       scheme,
-      mode,
-      setMode: (next) => { setModeState(next); void AsyncStorage.setItem(themeModeKey, next).catch(() => undefined); },
+      setScheme: (next) => { setSchemeState(next); void AsyncStorage.setItem(themeModeKey, next).catch(() => undefined); },
     };
-  }, [mode, systemScheme]);
+  }, [scheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
