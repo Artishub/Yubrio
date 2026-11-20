@@ -9,6 +9,7 @@ import { copy } from '@/design/copy';
 import { Person, Room } from '@/types';
 import { useDemo } from '@/stores/demo-store';
 import { displayName, displayTitle } from '@/utils/display-name';
+import { formatAvailabilityTime, isAvailabilityUpcoming } from '@/lib/validation/rules';
 
 type Signal = {
   id: string;
@@ -32,7 +33,7 @@ export default function ActivityScreen() {
     });
     const availabilitySignals = availability.filter((item) => item.personId !== me.id).slice(0, 2).flatMap((item) => {
       const person = people.find((entry) => entry.id === item.personId);
-      return person ? [{ id: `availability-${item.id}`, kind: 'availability' as const, person, title: `${displayName(person.name)} is free`, detail: `${item.expiresIn} · ${item.note || 'Up for anything.'}`, actionLabel: copy.activity.seeRooms }] : [];
+      return person ? [{ id: `availability-${item.id}`, kind: 'availability' as const, person, title: `${displayName(person.name)} is free${isAvailabilityUpcoming(item.startsAt) ? ' later' : ''}`, detail: `${item.expiresAt ? formatAvailabilityTime(item.expiresAt, item.startsAt) : item.expiresIn} · ${item.note || 'Up for anything.'}`, actionLabel: copy.activity.seeRooms }] : [];
     });
     return [...roomSignals, ...availabilitySignals].slice(0, 5);
   }, [availability, me, people, rooms]);

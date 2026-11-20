@@ -7,9 +7,11 @@ export const copy = {
     freeState: {
       available: 'You’re available',
       online: 'You’re online',
+      later: 'You’re free',
       changeAction: 'Change availability',
     },
     friendsAvailable: 'Friends who are free',
+    freeLater: 'Free',
     friendsEmpty: 'None of your friends are currently online.',
     available: 'Available now',
     rooms: 'Active Rooms',

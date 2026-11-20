@@ -87,3 +87,28 @@ test('custom room times use a strict 24-hour clock format', () => {
   assert.equal(isValidClockTime('18:60'), false);
   assert.equal(isValidClockTime('tonight'), false);
 });
+
+test('availability window turns clock times into a start and end', () => {
+  const { availabilityWindow } = require('../.test-build/rules.js');
+  const noon = new Date(2026, 0, 10, 12, 0, 0, 0).getTime();
+  const later = availabilityWindow('14:00', '17:00', noon);
+  assert.equal(new Date(later.startsAt).getHours(), 14);
+  assert.equal(later.expiresAt - later.startsAt, 3 * 60 * 60 * 1000);
+  const running = availabilityWindow('09:00', '17:00', noon);
+  assert.ok(running.startsAt < noon && running.expiresAt > noon);
+  const tomorrow = availabilityWindow('09:00', '11:00', noon);
+  assert.equal(new Date(tomorrow.startsAt).getDate(), 11);
+  const overnight = availabilityWindow('22:00', '02:00', noon);
+  assert.equal(overnight.expiresAt - overnight.startsAt, 4 * 60 * 60 * 1000);
+  assert.equal(availabilityWindow('25:00', '17:00', noon), null);
+});
+
+test('availability time shows the window until it starts, then time left', () => {
+  const { formatAvailabilityTime, isAvailabilityUpcoming } = require('../.test-build/rules.js');
+  const now = 1_000_000_000_000;
+  const hour = 60 * 60 * 1000;
+  assert.equal(isAvailabilityUpcoming(now + hour, now), true);
+  assert.equal(isAvailabilityUpcoming(undefined, now), false);
+  assert.match(formatAvailabilityTime(now + 3 * hour, now + hour, now), /–/);
+  assert.equal(formatAvailabilityTime(now + 3 * hour, now - hour, now), '3h left');
+});

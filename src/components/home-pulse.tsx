@@ -9,28 +9,30 @@ import { copy } from '@/design/copy';
 import { Person } from '@/types';
 import { displayName } from '@/utils/display-name';
 
-type PulseFriend = { person: Person; expiresIn: string; note: string; canMessage: boolean; availabilityId: string };
+type PulseFriend = { person: Person; expiresIn: string; upcoming: boolean; note: string; canMessage: boolean; availabilityId: string };
 
 type HomePulseProps = {
-  isFree?: boolean;
+  mine?: { expiresIn: string; upcoming: boolean };
   friends: PulseFriend[];
   onFree: () => void;
   onMessage: (friend: PulseFriend) => void;
 };
 
-export function HomePulse({ isFree = false, friends, onFree, onMessage }: HomePulseProps) {
+export function HomePulse({ mine, friends, onFree, onMessage }: HomePulseProps) {
+  const isFree = Boolean(mine);
+  const freeNow = Boolean(mine && !mine.upcoming);
   const reducedMotion = useReducedMotion();
   const { width } = useWindowDimensions();
   const compact = width < 350;
   const onlinePulse = useSharedValue(1);
 
   useEffect(() => {
-    if (reducedMotion || !isFree) {
+    if (reducedMotion || !freeNow) {
       onlinePulse.value = 1;
       return;
     }
     onlinePulse.value = withRepeat(withTiming(1.7, { duration: 1150 }), -1, true);
-  }, [isFree, onlinePulse, reducedMotion]);
+  }, [freeNow, onlinePulse, reducedMotion]);
   const onlinePulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: onlinePulse.value }], opacity: 1.55 - onlinePulse.value * 0.55 }));
   const visibleFriends = friends.slice(0, 4);
   const pressLight = () => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); };
@@ -38,7 +40,7 @@ export function HomePulse({ isFree = false, friends, onFree, onMessage }: HomePu
   return <View style={[styles.shell, compact && styles.shellCompact]}>
     {isFree && <View style={styles.hero}>
       <View style={styles.onlineMark}><Animated.View style={[styles.onlineRing, onlinePulseStyle]} /><View style={styles.onlineCore} /></View>
-      <View style={styles.heroCopy}><YText style={styles.heroTitle}>{copy.home.freeState.online}</YText></View>
+      <View style={styles.heroCopy}><YText style={styles.heroTitle}>{mine?.upcoming ? `${copy.home.freeState.later} ${mine.expiresIn}` : copy.home.freeState.online}</YText></View>
       <Pressable accessibilityRole="button" accessibilityLabel={copy.home.freeState.changeAction} onPress={() => { pressLight(); onFree(); }} style={({ pressed }) => [styles.changeAction, pressed && styles.changeActionPressed]}><YText style={styles.changeActionText}>{copy.home.freeState.changeAction}</YText><Ionicons name="options-outline" size={15} color={colors.muted} /></Pressable>
     </View>}
 
@@ -56,8 +58,8 @@ function PulseFriendBubble({ friend, index, reducedMotion, onPress }: { friend: 
   const canMessage = friend.canMessage;
   return <Animated.View entering={reducedMotion ? undefined : FadeInDown.delay(90 + index * 70).springify()} style={styles.friendSignal}>
     <Pressable disabled={!canMessage} accessibilityRole={canMessage ? 'button' : undefined} accessibilityState={{ disabled: !canMessage }} accessibilityLabel={`${displayName(friend.person.name)}, ${friend.expiresIn}. ${canMessage ? `Message ${displayName(friend.person.name)}` : 'Messages are off'}`} onPress={() => { if (!canMessage) return; pressFriend(); onPress(); }} style={({ pressed }) => [styles.friendButton, pressed && styles.friendButtonPressed, !canMessage && styles.friendButtonUnavailable]}>
-      <View style={[styles.friendAvatarWrap, { borderColor: friend.person.color }]}><Avatar person={friend.person} size={38} /><View style={styles.friendStatus} /></View>
-      <View style={styles.friendCopy}><YText style={styles.friendName} numberOfLines={1}>{displayName(friend.person.name)}</YText><YText style={styles.friendTime} numberOfLines={1}>{friend.expiresIn}</YText>{index === 0 && friend.note ? <YText style={styles.friendNote} numberOfLines={1}>{friend.note}</YText> : null}</View>
+      <View style={[styles.friendAvatarWrap, { borderColor: friend.upcoming ? colors.line : friend.person.color }]}><Avatar person={friend.person} size={38} />{!friend.upcoming && <View style={styles.friendStatus} />}</View>
+      <View style={styles.friendCopy}><YText style={styles.friendName} numberOfLines={1}>{displayName(friend.person.name)}</YText><YText style={styles.friendTime} numberOfLines={1}>{friend.upcoming ? `${copy.home.freeLater} ${friend.expiresIn}` : friend.expiresIn}</YText>{index === 0 && friend.note ? <YText style={styles.friendNote} numberOfLines={1}>{friend.note}</YText> : null}</View>
       <Ionicons name={canMessage ? 'arrow-up' : 'lock-closed-outline'} size={canMessage ? 15 : 13} color={canMessage ? colors.muted : colors.faint} style={canMessage ? styles.friendArrow : undefined} />
     </Pressable>
   </Animated.View>;

@@ -52,6 +52,24 @@ export function formatRemainingDuration(expiresAt: number, now = Date.now()) {
   return minutes >= 60 ? `${Math.max(1, Math.floor(minutes / 60))}h left` : `${minutes}m left`;
 }
 
+export function isAvailabilityUpcoming(startsAt: number | undefined, now = Date.now()) {
+  return startsAt !== undefined && startsAt > now;
+}
+
+export function formatAvailabilityTime(expiresAt: number, startsAt?: number, now = Date.now()) {
+  if (!isAvailabilityUpcoming(startsAt, now)) return formatRemainingDuration(expiresAt, now);
+  return `${formatClock(startsAt!)}–${formatClock(expiresAt)}`;
+}
+
+export function availabilityWindow(from: string, until: string, now = Date.now()) {
+  if (!isValidClockTime(from) || !isValidClockTime(until)) return null;
+  const start = atClockTime(from, now);
+  const end = atClockTime(until, now);
+  if (end <= start) end.setDate(end.getDate() + 1);
+  if (end.getTime() <= now) { start.setDate(start.getDate() + 1); end.setDate(end.getDate() + 1); }
+  return { startsAt: start.getTime(), expiresAt: end.getTime() };
+}
+
 export function canInviteToRoom(creatorId: string, viewerId: string, participantsCanInvite: boolean) {
   return creatorId === viewerId || participantsCanInvite;
 }
@@ -67,6 +85,17 @@ export function isValidClockTime(value: string) {
   const hour = Number(match[1]);
   const minute = Number(match[2]);
   return hour < 24 && minute < 60;
+}
+
+function atClockTime(value: string, now: number) {
+  const [hour, minute] = value.trim().split(':').map(Number);
+  const date = new Date(now);
+  date.setHours(hour, minute, 0, 0);
+  return date;
+}
+
+function formatClock(value: number) {
+  return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function toMilliseconds(value: number | Date) {

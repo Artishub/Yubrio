@@ -1,6 +1,7 @@
 import { Availability, Circle, Person, Room, RoomSuggestion } from '@/types';
 
 const demoNow = Date.now();
+const nextFullHour = new Date(demoNow).setMinutes(60, 0, 0);
 
 export const people: Person[] = [
   { id: 'lisa', name: 'Lisa', initials: 'L', color: '#F6B49E' },
@@ -27,6 +28,7 @@ export const rooms: Room[] = [
 
 export const availability: Availability[] = [
   { id: 'sarah-free', personId: 'sarah', expiresIn: '2h left', expiresAt: Date.now() + 2 * 60 * 60 * 1000, note: 'Up for anything.', canMessage: true },
+  { id: 'max-free', personId: 'max', expiresIn: 'later', startsAt: nextFullHour + 60 * 60 * 1000, expiresAt: nextFullHour + 5 * 60 * 60 * 1000, note: 'Gaming after dinner.', canMessage: true },
   { id: 'alex-free', personId: 'alex', expiresIn: 'until tonight', expiresAt: Date.now() + 7 * 60 * 60 * 1000, note: 'Maybe coffee or gaming.', canMessage: true },
 ];
 
