@@ -2,10 +2,10 @@
 
 <!--
 THESIS: Yubrio is a live social signal, not a feed; the first viewport should feel like a room waking up around your people.
-OWN-WORLD: Ink-black canvas, acid-lime actions, small hot color fields, compact system typography, and spatial signal tiles that feel placed rather than stacked.
+OWN-WORLD: Stickers and color blocks: cream or warm dark canvas, flat activity colors as whole room blocks, solid outlines with hard offset shadows, emoji and avatar stickers, round display type, lime for Yeb.
 STORY: You instantly see whether anyone is around, choose a low-pressure action, and move into a temporary room without admin-looking UI.
-FIRST VIEWPORT: A tight greeting leads into a wide “around right now” signal board. The main availability action anchors the board; open rooms become a horizontal set of moments below.
-FORM: Operate-mode spatial board, horizontal room moments, native sheets for creation, push navigation for room detail. The signature interaction is a friend signal brightening when someone becomes available or joins.
+FIRST VIEWPORT: Greeting and your avatar, your own status with a one-tap “I’m free”, free friends as a row of stickers, then a short list of rooms as color blocks.
+FORM: Three tabs, a vertical room list, native sheets for creation, push navigation for room detail. Signature interactions: swipe a room to Yeb, the Yeb burst, and the stretch smear while scrolling.
 -->
 
 <!-- Direction contract: operate-mode mobile UI; calm until something happens. -->
@@ -16,7 +16,7 @@ Yubrio is a quiet social signal that becomes vivid around real friend activity. 
 
 ## Own-world
 
-True ink-black surfaces, warm white type, acid-lime energy, and a small set of coral, violet, sky, and amber presence marks. Color is carried by compact signal tiles, activity icons, and intentional action accents; surfaces are mostly open space with occasional soft elevation. Glass is reserved for floating navigation and live context.
+Stickers and color blocks. Warm cream (or warm dark) canvas, flat saturated activity colors as whole room blocks, solid outlines with hard offset shadows, emoji and avatars as die-cut stickers that sit slightly crooked, and the round Fredoka display face for anything that speaks loudly. Lime stays the Yeb color. No glass, gradients, soft glows or neon-on-black.
 
 ## Story
 
@@ -32,4 +32,4 @@ Operate mode with spatial composition instead of stacked inventory. The home boa
 
 ## Color and type
 
-Dark mode leads for short mobile use at mixed indoor light: #090B0D canvas, #14191D surfaces, #F4F7F2 ink, #AAB3B5 muted text, and #D9FF57 lime. Activity colors stay semantic and sparse. The system sans keeps body text native and readable; hierarchy comes from scale, weight, and placement rather than all-caps labels.
+Light: `#FFF6E5` canvas, white cards, `#1A1A1A` ink and outline. Dark: `#211D19` canvas, `#2E2924` cards, cream ink, black outline. Activity fills and lime `#D4FF3A` are identical in both modes and always carry near-black text. Fredoka Bold for titles and buttons, system sans for body.

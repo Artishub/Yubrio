@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, useReducedMotion } from 'react-native-reanimated';
 import { ActionButton, Avatar, YText } from '@/components/ui';
-import { Colors, radius, spacing } from '@/design/tokens';
+import { Colors, display, radius, spacing, sticker } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
 import { Person } from '@/types';
@@ -22,14 +22,14 @@ export function FreeStatus({ mine, pending, onFreeNow, onOptions, onEnd }: { min
       <View style={styles.freeHead}>
         <View style={[styles.dot, mine.upcoming && styles.dotLater]} />
         <View style={styles.freeCopy}>
-          <YText style={styles.title}>{mine.upcoming ? copy.home.status.freeLater : copy.home.status.freeNow}</YText>
-          <YText style={styles.hint}>{mine.expiresIn}</YText>
+          <YText style={[styles.title, styles.onColor]}>{mine.upcoming ? copy.home.status.freeLater : copy.home.status.freeNow}</YText>
+          <YText style={[styles.hint, styles.onColor]}>{mine.expiresIn}</YText>
         </View>
       </View>
       <View style={styles.actions}>
         <ActionButton label={copy.home.status.change} icon="options-outline" variant="secondary" onPress={onOptions} style={styles.grow} />
         <Pressable accessibilityRole="button" accessibilityLabel={copy.home.status.end} disabled={pending} onPress={onEnd} style={({ pressed }) => [styles.endButton, (pressed || pending) && styles.dimmed]}>
-          <YText style={styles.endText}>{copy.home.status.end}</YText>
+          <YText style={[styles.endText, styles.onColor]}>{copy.home.status.end}</YText>
         </Pressable>
       </View>
     </View>;
@@ -51,7 +51,6 @@ export type FreeFriend = { person: Person; expiresIn: string; upcoming: boolean;
 
 // Friends who are free now or later today, as a row of faces.
 export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPress: (friend: FreeFriend) => void }) {
-  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const reducedMotion = useReducedMotion();
 
@@ -70,8 +69,8 @@ export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPre
           onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(friend); }}
           style={({ pressed }) => [styles.friend, pressed && styles.dimmed]}
         >
-          <View style={[styles.ring, friend.upcoming ? styles.ringLater : { borderColor: colors.brandText }]}>
-            <Avatar person={friend.person} size={52} />
+          <View style={[styles.sticker, friend.upcoming && styles.stickerLater, { transform: [{ rotate: index % 2 === 0 ? '-4deg' : '3deg' }] }]}>
+            <Avatar person={friend.person} size={54} />
             {!friend.upcoming && <View style={styles.liveDot} />}
           </View>
           <YText style={styles.friendName} numberOfLines={1}>{name}</YText>
@@ -83,28 +82,30 @@ export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPre
 }
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
-  card: { padding: spacing.lg, borderRadius: radius.card, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
-  cardFree: { borderColor: colors.brandText, backgroundColor: colors.availabilityTint },
-  title: { fontSize: 20, lineHeight: 25, fontWeight: '800', letterSpacing: -0.4 },
+  card: { padding: spacing.lg, borderRadius: radius.card, backgroundColor: colors.surface, ...sticker(colors) },
+  cardFree: { backgroundColor: colors.brand },
+  onColor: { color: colors.onColor },
+  title: { ...display, fontSize: 24, lineHeight: 29 },
   hint: { fontSize: 14, lineHeight: 19, fontWeight: '600', color: colors.muted, marginTop: 2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.lg },
   grow: { flex: 1 },
-  optionsButton: { width: 54, height: 54, borderRadius: radius.button, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
+  optionsButton: { width: 52, height: 52, borderRadius: radius.button, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', ...sticker(colors, 3) },
   endButton: { minHeight: 54, paddingHorizontal: spacing.lg, justifyContent: 'center' },
-  endText: { fontSize: 15, fontWeight: '800', color: colors.muted },
+  endText: { ...display, fontSize: 16, color: colors.muted },
   dimmed: { opacity: 0.6 },
   freeHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   freeCopy: { flex: 1 },
-  dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.brandText },
-  dotLater: { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.brandText },
+  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.onColor },
+  dotLater: { backgroundColor: 'transparent', borderWidth: 3, borderColor: colors.onColor },
   empty: { fontSize: 14, lineHeight: 20, fontWeight: '600', color: colors.muted },
   friendScroll: { marginHorizontal: -spacing.xl },
-  friendRow: { paddingHorizontal: spacing.xl, gap: spacing.md },
+  friendRow: { paddingHorizontal: spacing.xl, paddingVertical: 6, gap: spacing.md },
   friend: { width: 76, alignItems: 'center' },
-  ring: { width: 64, height: 64, borderRadius: 32, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  ringLater: { borderStyle: 'dashed', borderColor: colors.faint },
-  liveDot: { position: 'absolute', right: 1, bottom: 1, width: 14, height: 14, borderRadius: 7, backgroundColor: colors.brandText, borderWidth: 2, borderColor: colors.canvas },
-  friendName: { fontSize: 13, fontWeight: '800', marginTop: 6 },
+  // A die-cut sticker: white rim, outline, small hard shadow.
+  sticker: { padding: 3, borderRadius: 40, backgroundColor: colors.paper, ...sticker(colors, 3) },
+  stickerLater: { opacity: 0.55, borderStyle: 'dashed', boxShadow: undefined },
+  liveDot: { position: 'absolute', right: -2, bottom: -2, width: 18, height: 18, borderRadius: 9, backgroundColor: colors.brand, borderWidth: 2, borderColor: colors.outline },
+  friendName: { fontSize: 13, fontWeight: '700', marginTop: 8 },
   friendWhen: { fontSize: 11, fontWeight: '700', color: colors.muted, marginTop: 1 },
   friendWhenNow: { color: colors.brandText },
 });

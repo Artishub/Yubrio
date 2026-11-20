@@ -16,6 +16,7 @@
     "test": "tsc --ignoreConfig --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build src/lib/validation/rules.ts && node --test tests/*.test.js"
   },
   "dependencies": {
+    "@expo-google-fonts/fredoka": "^0.4.1",
     "@expo/cli": "^57.0.20",
     "@expo/metro-runtime": "~57.0.14",
     "@expo/vector-icons": "^15.0.2",
