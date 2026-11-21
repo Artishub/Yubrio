@@ -3,6 +3,7 @@ import { German } from './types';
 // The room screen: joining, people, invites, suggestions and room chat.
 export const room: German = {
   exact: {
+    'Or pick a time': 'Oder such dir eine Zeit aus',
     'Finding that room…': 'Raum wird gesucht …',
     'That room wouldn’t load.': 'Der Raum lädt gerade nicht.',
     'Check your connection and try again.': 'Prüf deine Verbindung und versuch es nochmal.',
@@ -75,16 +76,12 @@ export const room: German = {
     'When will you join?': 'Wann kommst du dazu?',
     'in 30 minutes': 'in 30 Minuten',
     'in 1 hour': 'in 1 Stunde',
-    'Custom arrival time': 'Eigene Ankunftszeit',
-    'Custom time · e.g. 19:30': 'Eigene Zeit · z. B. 19:30',
-    'Use a time like 19:30.': 'Gib eine Zeit wie 19:30 ein.',
-    'Use custom arrival time': 'Eigene Ankunftszeit übernehmen',
-    'Use this time': 'Diese Zeit nehmen',
   },
   patterns: [
     [/^(\d+) people$/, '$1 Leute'],
     [/^(\d+) invites sent$/, '$1 Einladungen verschickt'],
     [/^Joining around (.+)$/, 'Gegen $1 dabei'],
+    [/^around (\S+)$/, 'gegen $1'],
     [/^(.+) suggested$/, 'Vorschlag von $1'],
     // Room times that span days other than today and tomorrow; the date part is already localized.
     [/^Today (\S+)–(?!Tomorrow )(.+)$/, 'Heute $1–$2'],

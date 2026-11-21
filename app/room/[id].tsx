@@ -25,7 +25,7 @@ import { useQuery } from '@tanstack/react-query';
 import { roomMessages as seededRoomMessages } from '@/data/demo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { displayName, displayTitle } from '@/utils/display-name';
-import { filterInvitableFriendIds, findLink, isValidClockTime } from '@/lib/validation/rules';
+import { filterInvitableFriendIds, findLink, halfHourSlots } from '@/lib/validation/rules';
 import * as Linking from 'expo-linking';
 import { YebBurst } from '@/components/yeb-burst';
 import * as Haptics from 'expo-haptics';
@@ -857,16 +857,9 @@ function LaterModal({
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const t = useT();
-  const [custom, setCustom] = useState('');
-  const customValid = isValidClockTime(custom);
-  const choose = (arrival: string) => {
-    setCustom('');
-    onChoose(arrival);
-  };
-  const close = () => {
-    setCustom('');
-    onClose();
-  };
+  const [slots] = useState(() => halfHourSlots(Date.now(), 12));
+  const choose = onChoose;
+  const close = onClose;
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={close}>
       <View style={styles.backdrop}>
@@ -901,39 +894,20 @@ function LaterModal({
               <Ionicons name="arrow-forward" size={18} color={colors.faint} />
             </Pressable>
           ))}
-          <TextInput
-            accessibilityLabel={t('Custom arrival time')}
-            value={custom}
-            onChangeText={setCustom}
-            placeholder={t('Custom time · e.g. 19:30')}
-            placeholderTextColor={colors.faint}
-            style={{
-              minHeight: 52,
-              backgroundColor: colors.surface,
-              borderRadius: 16,
-              paddingHorizontal: 15,
-              color: colors.ink,
-              fontSize: 15,
-              marginTop: 10,
-            }}
-          />
-          {custom.trim() && !customValid ? (
-            <YText style={styles.arrivalError}>{t('Use a time like 19:30.')}</YText>
-          ) : null}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('Use custom arrival time')}
-            accessibilityState={{ disabled: !customValid }}
-            disabled={!customValid}
-            onPress={() => choose(`around ${custom.trim()}`)}
-            style={[styles.arrivalChoice, !customValid && { opacity: 0.45 }]}
-          >
-            <View style={styles.clockIcon}>
-              <Ionicons name="create-outline" size={18} color={colors.brandInk} />
-            </View>
-            <YText style={styles.arrivalText}>{t('Use this time')}</YText>
-            <Ionicons name="arrow-forward" size={18} color={colors.faint} />
-          </Pressable>
+          <YText style={styles.arrivalSlotsLabel}>{t('Or pick a time')}</YText>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.arrivalSlots}>
+            {slots.map((slot) => (
+              <Pressable
+                key={slot}
+                accessibilityRole="button"
+                accessibilityLabel={t(`around ${slot}`)}
+                onPress={() => onChoose(`around ${slot}`)}
+                style={({ pressed }) => [styles.arrivalSlot, pressed && styles.tactilePressed]}
+              >
+                <YText style={styles.arrivalSlotText}>{slot}</YText>
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -1281,6 +1255,17 @@ const makeStyles = (colors: Colors) =>
     },
     inviteButtonText: { color: colors.brandText, fontSize: 13, fontWeight: '800' },
     inviteNotice: { color: colors.brandText, fontSize: 12, fontWeight: '800', marginTop: 8 },
+    arrivalSlotsLabel: { fontSize: 13, fontWeight: '700', color: colors.muted, marginTop: spacing.lg },
+    arrivalSlots: { gap: 8, paddingVertical: spacing.sm },
+    arrivalSlot: {
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius: radius.chip,
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.line,
+    },
+    arrivalSlotText: { fontSize: 14, fontWeight: '800' },
     actionError: {
       color: colors.error,
       fontSize: 13,

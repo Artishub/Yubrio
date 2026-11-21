@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { ActionButton, Avatar, YText } from '@/components/ui';
 import { radius, spacing, type, Colors } from '@/design/tokens';
+import { Backdrop } from '@/components/backdrop';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { currentUser, people } from '@/data/demo';
 import { useAuth } from '@/stores/auth-store';
@@ -89,10 +90,7 @@ export default function AddFriendScreen() {
           : 'Connection already exists';
   return (
     <View style={styles.root}>
-      <View style={[styles.fieldLayer, styles.pointerNone]}>
-        <View style={[styles.colorField, styles.fieldOne]} />
-        <View style={[styles.colorField, styles.fieldTwo]} />
-      </View>
+      <Backdrop />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -193,10 +191,6 @@ const makeStyles = (colors: Colors) =>
   StyleSheet.create({
     pointerNone: { pointerEvents: 'none' },
     root: { flex: 1, backgroundColor: colors.canvas },
-    fieldLayer: { ...StyleSheet.absoluteFill, overflow: 'hidden' },
-    colorField: { position: 'absolute', opacity: 0.12, transform: [{ rotate: '18deg' }] },
-    fieldOne: { width: 220, height: 84, top: 134, right: -112, backgroundColor: colors.electric },
-    fieldTwo: { width: 170, height: 70, bottom: 110, left: -98, backgroundColor: colors.coral },
     content: { flexGrow: 1, paddingTop: 56, paddingHorizontal: spacing.xl, paddingBottom: 48 },
     back: {
       width: 44,
