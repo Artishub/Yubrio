@@ -83,7 +83,7 @@ export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPre
 
 const makeStyles = (colors: Colors) => StyleSheet.create({
   card: { padding: spacing.lg, borderRadius: radius.card, backgroundColor: colors.surface, ...sticker(colors) },
-  cardFree: { backgroundColor: colors.brand },
+  cardFree: { backgroundColor: colors.availability },
   onColor: { color: colors.onColor },
   title: { ...display, fontSize: 24, lineHeight: 29 },
   hint: { fontSize: 14, lineHeight: 19, fontWeight: '600', color: colors.muted, marginTop: 2 },

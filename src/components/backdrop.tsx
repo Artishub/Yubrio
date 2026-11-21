@@ -21,7 +21,7 @@ export function Backdrop() {
     <Svg width="100%" height="100%">
       <Defs>
         {lights.map((light) => <RadialGradient key={light.id} id={`${prefix}${light.id}`} cx={light.cx} cy={light.cy} r={light.r} gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={light.color} stopOpacity="0.7" />
+          <Stop offset="0" stopColor={light.color} stopOpacity="0.38" />
           <Stop offset="1" stopColor={light.color} stopOpacity="0" />
         </RadialGradient>)}
       </Defs>

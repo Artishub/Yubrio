@@ -80,7 +80,7 @@ export function RoomRow({ room, people, onOpen, onYeb }: { room: Room; people: P
       {room.joined
         ? <View accessible accessibilityLabel={copy.room.joined} style={styles.joined}><Ionicons name="checkmark" size={16} color={colors.onColor} /><YText style={styles.joinedText}>{copy.home.joinedShort}</YText></View>
         : <Pressable accessibilityRole="button" accessibilityLabel={`Yeb, join ${title}`} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onYeb(); }} style={({ pressed }) => [styles.yeb, pressed && styles.yebPressed]}>
-          <Ionicons name="flash" size={15} color={colors.brand} /><YText style={styles.yebText}>{copy.room.join}</YText>
+          <Ionicons name="flash" size={15} color={colors.brandInk} /><YText style={styles.yebText}>{copy.room.join}</YText>
         </Pressable>}
       <YebBurst active={Boolean(room.joined)} />
     </View>
@@ -99,17 +99,16 @@ const makeStyles = (colors: Colors) => StyleSheet.create({
   title: { ...display, fontSize: 20, lineHeight: 24, color: colors.onColor },
   line: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
   time: { flexShrink: 1, fontSize: 13, fontWeight: '700', color: colors.onColor },
-  nowBadge: { paddingHorizontal: 7, paddingVertical: 1, borderRadius: radius.chip, backgroundColor: colors.onColor },
-  nowText: { fontSize: 12, fontWeight: '800', color: colors.paper },
+  nowBadge: { paddingHorizontal: 7, paddingVertical: 1, borderRadius: radius.chip, backgroundColor: colors.brand },
+  nowText: { fontSize: 12, fontWeight: '800', color: colors.brandInk },
   place: { flexShrink: 1, fontSize: 13, fontWeight: '700', color: colors.onColor },
   people: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
   overlap: { marginLeft: -7 },
   count: { fontSize: 12, fontWeight: '700', color: colors.onColor, marginLeft: 8 },
   action: { alignSelf: 'center' },
-  // Black with lime, so it reads the same on every activity color.
-  yeb: { minHeight: 46, paddingHorizontal: spacing.md, borderRadius: radius.button, backgroundColor: colors.onColor, flexDirection: 'row', alignItems: 'center', gap: 5 },
+  yeb: { minHeight: 46, paddingHorizontal: spacing.md, borderRadius: radius.button, backgroundColor: colors.brand, flexDirection: 'row', alignItems: 'center', gap: 5 },
   yebPressed: { transform: [{ scale: 0.94 }] },
-  yebText: { ...display, fontSize: 17, color: colors.brand },
+  yebText: { ...display, fontSize: 17, color: colors.brandInk },
   joined: { minHeight: 44, paddingHorizontal: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: 4 },
   joinedText: { ...display, fontSize: 15, color: colors.onColor },
 });

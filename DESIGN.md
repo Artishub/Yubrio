@@ -32,4 +32,4 @@ Operate mode with spatial composition instead of stacked inventory. The home boa
 
 ## Color and type
 
-Dark (default): `#211D19` canvas, `#2E2924` cards, cream ink, black outline and hard shadows, solid activity fills. Glass: pale canvas under a pastel light backdrop, translucent white panes with a white rim and soft shadow, activity colors as tinted glass. Lime `#D4FF3A` is the Yeb color in both and always carries near-black text. Fredoka Bold for titles and buttons, system sans for body.
+Dark (default): `#211D19` canvas, `#2E2924` cards, cream ink, black outline and small hard shadows, deep muted activity fills with cream text. Glass: pale canvas under a pastel light backdrop, translucent white panes with a white rim and soft shadow, activity colors as tinted glass. Lime `#D4FF3A` is the Yeb color in both and always carries near-black text. Fredoka Bold for titles and buttons, system sans for body.
