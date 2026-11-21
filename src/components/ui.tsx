@@ -16,6 +16,7 @@ import { radius, spacing, type, ActivityType, Colors, shadowCard, display, stick
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { Person, Room } from '@/types';
 import { copy } from '@/design/copy';
+import { useT } from '@/design/i18n';
 import { displayName, displayTitle } from '@/utils/display-name';
 
 export function YText({ style, ...props }: TextProps) {
@@ -160,6 +161,7 @@ export function GlassBackdrop({ intensity = 42, style }: { intensity?: number; s
 export function RoomCard({ room, people }: { room: Room; people: Person[] }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const meta = activityMeta[room.activity];
   const peopleLabel =
     room.count <= 0 ? 'Open to your people' : room.count === 1 ? '1 person is in' : `${room.count} people are in`;
@@ -172,9 +174,9 @@ export function RoomCard({ room, people }: { room: Room; people: Person[] }) {
       <View style={styles.roomTop}>
         <ActivityIcon activity={room.activity} size={42} />
         <View style={styles.roomTitleWrap}>
-          <YText style={[styles.roomMomentKicker, { color: meta.color }]}>{roomStatus(room)}</YText>
+          <YText style={[styles.roomMomentKicker, { color: meta.color }]}>{t(roomStatus(room))}</YText>
           <YText style={styles.roomMomentTitle}>{displayTitle(room.title)}</YText>
-          <YText style={styles.roomMomentTime}>{room.time}</YText>
+          <YText style={styles.roomMomentTime}>{t(room.time)}</YText>
         </View>
       </View>
       <View style={styles.roomBottom}>
@@ -187,9 +189,9 @@ export function RoomCard({ room, people }: { room: Room; people: Person[] }) {
               {people
                 .slice(0, 2)
                 .map((person) => displayName(person.name))
-                .join(' · ') || 'Be the first in'}
+                .join(' · ') || t('Be the first in')}
             </YText>
-            <YText style={styles.roomMomentPeople}>{peopleLabel}</YText>
+            <YText style={styles.roomMomentPeople}>{t(peopleLabel)}</YText>
           </View>
         </View>
         {room.detail ? (
@@ -197,7 +199,7 @@ export function RoomCard({ room, people }: { room: Room; people: Person[] }) {
             {room.detail}
           </YText>
         ) : (
-          <YText style={styles.location}>{room.location ?? 'Undecided'}</YText>
+          <YText style={styles.location}>{room.location ?? t('Undecided')}</YText>
         )}
       </View>
     </Animated.View>
@@ -217,6 +219,7 @@ export function AvailabilityCard({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const reducedMotion = useReducedMotion();
   return (
     <Animated.View
@@ -232,15 +235,15 @@ export function AvailabilityCard({
             <YText style={styles.personName}>{displayName(person.name)}</YText>
             <View style={styles.freeBadge}>
               <View style={styles.freeDot} />
-              <YText style={styles.freeText}>FREE</YText>
+              <YText style={styles.freeText}>{t('FREE')}</YText>
             </View>
           </View>
-          <YText style={styles.meta}>{expiresIn}</YText>
+          <YText style={styles.meta}>{t(expiresIn)}</YText>
         </View>
         {onMessage && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Message ${displayName(person.name)}`}
+            accessibilityLabel={t(`Message ${displayName(person.name)}`)}
             onPress={onMessage}
             style={styles.messageButton}
           >
@@ -248,9 +251,9 @@ export function AvailabilityCard({
           </Pressable>
         )}
       </View>
-      <YText style={styles.availabilityNote}>{note || 'Up for anything.'}</YText>
+      <YText style={styles.availabilityNote}>{note || t('Up for anything.')}</YText>
       <View style={styles.availabilityFooter}>
-        <YText style={styles.availabilityFooterText}>Message while they’re free</YText>
+        <YText style={styles.availabilityFooterText}>{t('Message while they’re free')}</YText>
         <Ionicons name="arrow-forward" size={14} color={colors.muted} />
       </View>
     </Animated.View>
@@ -259,6 +262,7 @@ export function AvailabilityCard({
 export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const reducedMotion = useReducedMotion();
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }), []);
@@ -266,20 +270,20 @@ export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () =
     <>
       <Ionicons name={joined ? 'checkmark' : 'flash'} size={19} color={colors.brandInk} />
       <YText style={[styles.yebLabel, joined && styles.yebJoinedLabel]}>
-        {joined ? copy.room.joined : copy.room.join}
+        {t(joined ? copy.room.joined : copy.room.join)}
       </YText>
     </>
   );
   return (
     <Animated.View style={animatedStyle}>
       {joined ? (
-        <View accessible accessibilityLabel={copy.room.joined} style={[styles.yebButton, styles.yebJoined]}>
+        <View accessible accessibilityLabel={t(copy.room.joined)} style={[styles.yebButton, styles.yebJoined]}>
           {content}
         </View>
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Yeb, join room"
+          accessibilityLabel={t('Yeb, join room')}
           onPress={() => {
             if (!reducedMotion)
               scale.set(

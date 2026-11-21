@@ -6,10 +6,12 @@ import { type } from '@/design/tokens';
 import { Colors } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { YText } from '@/components/ui';
+import { useT } from '@/design/i18n';
 
 export default function AuthCallback() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const router = useRouter();
   const params = useLocalSearchParams<{
     code?: string;
@@ -49,10 +51,10 @@ export default function AuthCallback() {
   if (error)
     return (
       <View style={styles.root}>
-        <YText style={type.section}>Couldn’t finish signing in.</YText>
-        <YText style={styles.error}>{error}</YText>
+        <YText style={type.section}>{t('Couldn’t finish signing in.')}</YText>
+        <YText style={styles.error}>{t(error)}</YText>
         <Pressable accessibilityRole="button" onPress={() => router.replace('/')}>
-          <YText style={styles.back}>Back to Yubrio</YText>
+          <YText style={styles.back}>{t('Back to Yubrio')}</YText>
         </Pressable>
       </View>
     );

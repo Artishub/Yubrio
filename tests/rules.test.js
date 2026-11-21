@@ -11,7 +11,7 @@ const {
   isRoomActive,
   isRoomInArchive,
   isWithinMaxDuration,
-} = require('../.test-build/rules.js');
+} = require('../.test-build/lib/validation/rules.js');
 
 const hour = 60 * 60 * 1000;
 
@@ -89,7 +89,7 @@ test('custom room times use a strict 24-hour clock format', () => {
 });
 
 test('availability window turns clock times into a start and end', () => {
-  const { availabilityWindow } = require('../.test-build/rules.js');
+  const { availabilityWindow } = require('../.test-build/lib/validation/rules.js');
   const noon = new Date(2026, 0, 10, 12, 0, 0, 0).getTime();
   const later = availabilityWindow('14:00', '17:00', noon);
   assert.equal(new Date(later.startsAt).getHours(), 14);
@@ -104,7 +104,7 @@ test('availability window turns clock times into a start and end', () => {
 });
 
 test('availability time shows the window until it starts, then time left', () => {
-  const { formatAvailabilityTime, isAvailabilityUpcoming } = require('../.test-build/rules.js');
+  const { formatAvailabilityTime, isAvailabilityUpcoming } = require('../.test-build/lib/validation/rules.js');
   const now = 1_000_000_000_000;
   const hour = 60 * 60 * 1000;
   assert.equal(isAvailabilityUpcoming(now + hour, now), true);
@@ -114,8 +114,15 @@ test('availability time shows the window until it starts, then time left', () =>
 });
 
 test('findLink pulls an openable link out of join details', () => {
-  const { findLink } = require('../.test-build/rules.js');
+  const { findLink } = require('../.test-build/lib/validation/rules.js');
   assert.equal(findLink('League · ARAM · discord.gg/abc123'), 'https://discord.gg/abc123');
   assert.equal(findLink('Join at https://example.com/room.'), 'https://example.com/room');
   assert.equal(findLink('Username: artjom#1234'), null);
+});
+
+test('halfHourSlots lists clock times on the half hour after a moment', () => {
+  const { halfHourSlots } = require('../.test-build/lib/validation/rules.js');
+  assert.deepEqual(halfHourSlots(new Date(2026, 0, 10, 18, 10).getTime(), 3), ['18:30', '19:00', '19:30']);
+  assert.deepEqual(halfHourSlots(new Date(2026, 0, 10, 23, 40).getTime(), 2), ['00:00', '00:30']);
+  assert.deepEqual(halfHourSlots(new Date(2026, 0, 10, 18, 30).getTime() + 1, 1), ['19:00']);
 });

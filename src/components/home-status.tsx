@@ -7,6 +7,7 @@ import { ActionButton, Avatar, YText } from '@/components/ui';
 import { Colors, display, radius, spacing, sticker } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
+import { useT } from '@/design/i18n';
 import { Person } from '@/types';
 import { displayName } from '@/utils/display-name';
 
@@ -28,6 +29,7 @@ export function FreeStatus({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
 
   if (mine) {
     return (
@@ -36,14 +38,14 @@ export function FreeStatus({
           <View style={[styles.dot, mine.upcoming && styles.dotLater]} />
           <View style={styles.freeCopy}>
             <YText style={[styles.title, styles.onColor]}>
-              {mine.upcoming ? copy.home.status.freeLater : copy.home.status.freeNow}
+              {t(mine.upcoming ? copy.home.status.freeLater : copy.home.status.freeNow)}
             </YText>
-            <YText style={[styles.hint, styles.onColor]}>{mine.expiresIn}</YText>
+            <YText style={[styles.hint, styles.onColor]}>{t(mine.expiresIn)}</YText>
           </View>
         </View>
         <View style={styles.actions}>
           <ActionButton
-            label={copy.home.status.change}
+            label={t(copy.home.status.change)}
             icon="options-outline"
             variant="secondary"
             onPress={onOptions}
@@ -51,12 +53,12 @@ export function FreeStatus({
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={copy.home.status.end}
+            accessibilityLabel={t(copy.home.status.end)}
             disabled={pending}
             onPress={onEnd}
             style={({ pressed }) => [styles.endButton, (pressed || pending) && styles.dimmed]}
           >
-            <YText style={[styles.endText, styles.onColor]}>{copy.home.status.end}</YText>
+            <YText style={[styles.endText, styles.onColor]}>{t(copy.home.status.end)}</YText>
           </Pressable>
         </View>
       </View>
@@ -65,11 +67,11 @@ export function FreeStatus({
 
   return (
     <View style={styles.card}>
-      <YText style={styles.title}>{copy.home.status.question}</YText>
-      <YText style={styles.hint}>{copy.home.status.hint}</YText>
+      <YText style={styles.title}>{t(copy.home.status.question)}</YText>
+      <YText style={styles.hint}>{t(copy.home.status.hint)}</YText>
       <View style={styles.actions}>
         <ActionButton
-          label={copy.home.status.freeAction}
+          label={t(copy.home.status.freeAction)}
           icon="radio-button-on"
           disabled={pending}
           onPress={onFreeNow}
@@ -77,7 +79,7 @@ export function FreeStatus({
         />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={copy.home.status.options}
+          accessibilityLabel={t(copy.home.status.options)}
           onPress={onOptions}
           style={({ pressed }) => [styles.optionsButton, pressed && styles.dimmed]}
         >
@@ -99,9 +101,10 @@ export type FreeFriend = {
 // Friends who are free now or later today, as a row of faces.
 export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPress: (friend: FreeFriend) => void }) {
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const reducedMotion = useReducedMotion();
 
-  if (!friends.length) return <YText style={styles.empty}>{copy.home.friendsEmpty}</YText>;
+  if (!friends.length) return <YText style={styles.empty}>{t(copy.home.friendsEmpty)}</YText>;
 
   return (
     <ScrollView
@@ -112,7 +115,7 @@ export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPre
     >
       {friends.map((friend, index) => {
         const name = displayName(friend.person.name);
-        const when = friend.upcoming ? friend.expiresIn : copy.home.freeNow;
+        const when = t(friend.upcoming ? friend.expiresIn : copy.home.freeNow);
         return (
           <Animated.View
             key={friend.availabilityId}
@@ -120,7 +123,7 @@ export function FreeFriends({ friends, onPress }: { friends: FreeFriend[]; onPre
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`${name}, ${friend.upcoming ? `${copy.home.freeLater} ${friend.expiresIn}` : `${copy.home.freeNow}, ${friend.expiresIn}`}`}
+              accessibilityLabel={`${name}, ${friend.upcoming ? `${t(copy.home.freeLater)} ${t(friend.expiresIn)}` : `${t(copy.home.freeNow)}, ${t(friend.expiresIn)}`}`}
               accessibilityState={{ disabled: !friend.canMessage }}
               disabled={!friend.canMessage}
               onPress={() => {

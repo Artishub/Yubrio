@@ -14,10 +14,12 @@ import { requestFriendByLink, resolveFriendLink } from '@/lib/supabase/repositor
 import { queryClient } from '@/lib/query/client';
 import { Person } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useT } from '@/design/i18n';
 
 export default function AddFriendScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const router = useRouter();
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -97,22 +99,24 @@ export default function AddFriendScreen() {
           { paddingTop: Math.max(56, insets.top + 16), paddingBottom: insets.bottom + 24 },
         ]}
       >
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={goBack} style={styles.back}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Go back')} onPress={goBack} style={styles.back}>
           <Ionicons name="arrow-back" size={21} color={colors.ink} />
         </Pressable>
         <View style={styles.mark}>
           <Ionicons name="sparkles" size={25} color={colors.brandInk} />
         </View>
-        <YText style={styles.kicker}>A FRIEND LINK</YText>
+        <YText style={styles.kicker}>{t('A FRIEND LINK')}</YText>
         <YText style={type.title}>
-          {invalid ? 'This link has gone quiet.' : isSelf ? 'That’s your link.' : `Meet ${name}.`}
+          {t(invalid ? 'This link has gone quiet.' : isSelf ? 'That’s your link.' : `Meet ${name}.`)}
         </YText>
         <YText style={styles.copy}>
-          {invalid
-            ? 'Ask your friend to share a new one.'
-            : isSelf
-              ? 'Share it with a friend to connect on Yubrio.'
-              : 'Yubrio keeps plans between people who choose each other.'}
+          {t(
+            invalid
+              ? 'Ask your friend to share a new one.'
+              : isSelf
+                ? 'Share it with a friend to connect on Yubrio.'
+                : 'Yubrio keeps plans between people who choose each other.',
+          )}
         </YText>
         {!invalid && (
           <View style={styles.profileCard}>
@@ -142,26 +146,34 @@ export default function AddFriendScreen() {
                     (requestStatus === 'pending' || isSelf) && { color: isSelf ? colors.muted : colors.coffee },
                   ]}
                 >
-                  {connectionLabel}
+                  {t(connectionLabel)}
                 </YText>
               </View>
             ) : null}
           </View>
         )}
         {remoteProfile.isError && !demoProfile ? (
-          <YText style={styles.error}>Couldn’t check the profile right now. You can still try the link.</YText>
+          <YText style={styles.error}>{t('Couldn’t check the profile right now. You can still try the link.')}</YText>
         ) : null}
-        {error ? <YText style={styles.error}>{error}</YText> : null}
+        {error ? <YText style={styles.error}>{t(error)}</YText> : null}
         {invalid || isSelf ? (
-          <ActionButton label="Go to Friends" icon="arrow-forward" onPress={() => router.replace('/(tabs)/friends')} />
+          <ActionButton
+            label={t('Go to Friends')}
+            icon="arrow-forward"
+            onPress={() => router.replace('/(tabs)/friends')}
+          />
         ) : !added && !alreadyConnected ? (
           <ActionButton
-            label={session || demoMode ? `Add ${name}` : 'Sign in to add'}
+            label={t(session || demoMode ? `Add ${name}` : 'Sign in to add')}
             icon="person-add-outline"
             onPress={() => void add()}
           />
         ) : (
-          <ActionButton label="Go to Friends" icon="arrow-forward" onPress={() => router.replace('/(tabs)/friends')} />
+          <ActionButton
+            label={t('Go to Friends')}
+            icon="arrow-forward"
+            onPress={() => router.replace('/(tabs)/friends')}
+          />
         )}
       </ScrollView>
     </View>

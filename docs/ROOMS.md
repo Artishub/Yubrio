@@ -4,11 +4,11 @@ Rooms are temporary, activity-centered social spaces. They expire after their en
 
 ## Creation
 
-Progressive steps: What (preset/custom), When (start + duration, max 24h), Where (in person/online/undecided), Who (friends/circles/specific people), Options (chat on by default, participant invites on/off). The common path should take 10–20 seconds.
+One sheet. What (activity and optional name) and When (start as “Now” or a half-hour slot, plus a duration up to 24h) are always visible and have defaults, so “Open room” works immediately. Where (in person/online/undecided with place, game and link) and Who sees it (friends/circles/specific people, chat on by default, participant invites on/off) are fold-out rows that show the current choice. Choosing Gaming switches Where to Online and opens it. Times are picked from chips, never typed. The common path should take a few seconds.
 
 ## Detail
 
-Show activity icon/title, scheduled time or remaining time, location/connection, People, and Chat if enabled. Primary state is “Yeb!”; joined state is “You’re in.” Creator appears as “Created room”, not host/admin/owner.
+Show activity icon/title, scheduled time or remaining time, location/connection, then People, Suggestions and Chat. Once the viewer has joined, Chat moves above People because it is what they use. Primary state is “Yeb!”; joined state is “You’re in.” Creator appears as “Created room”, not host/admin/owner.
 
 Gaming stays an activity type. For online gaming rooms, creation can optionally capture a game, mode, and flexible join details such as a username, Discord, server, or link. These are displayed as compact connection details rather than creating permanent game communities. A link in the details gets an Open button once the viewer has joined. A gaming room without a name is titled after its game.
 

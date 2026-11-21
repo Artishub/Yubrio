@@ -6,6 +6,7 @@ import { ActivityIcon, ActionButton, Avatar, PersonRow, YText, YebButton } from 
 import { ActivityType, isActivityType, radius, spacing, type, Colors, display, sticker } from '@/design/tokens';
 import { Backdrop } from '@/components/backdrop';
 import { useTheme, useThemedStyles } from '@/design/theme';
+import { Translate, useT } from '@/design/i18n';
 import { copy } from '@/design/copy';
 import { roomSuggestions as seededRoomSuggestions } from '@/data/demo';
 import { Room, RoomSuggestion } from '@/types';
@@ -32,6 +33,7 @@ import * as Haptics from 'expo-haptics';
 export default function RoomScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const router = useRouter();
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -63,22 +65,27 @@ export default function RoomScreen() {
   if (!room)
     return (
       <View style={[styles.missingRoot, { paddingTop: Math.max(24, insets.top + 12) }]}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={goBack} style={styles.navButton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('Go back')}
+          onPress={goBack}
+          style={styles.navButton}
+        >
           <Ionicons name="arrow-back" size={21} color={colors.ink} />
         </Pressable>
         <View style={styles.missingCopy}>
           {remoteRoom.isPending ? (
             <>
               <ActivityIndicator color={colors.brandText} />
-              <YText style={styles.missingText}>Finding that room…</YText>
+              <YText style={styles.missingText}>{t('Finding that room…')}</YText>
             </>
           ) : remoteRoom.isError ? (
             <>
               <ActivityIcon activity="custom" size={58} />
-              <YText style={type.section}>That room wouldn’t load.</YText>
-              <YText style={styles.missingText}>Check your connection and try again.</YText>
+              <YText style={type.section}>{t('That room wouldn’t load.')}</YText>
+              <YText style={styles.missingText}>{t('Check your connection and try again.')}</YText>
               <ActionButton
-                label="Try again"
+                label={t('Try again')}
                 icon="refresh"
                 onPress={() => void remoteRoom.refetch()}
                 style={{ marginTop: spacing.lg }}
@@ -87,10 +94,10 @@ export default function RoomScreen() {
           ) : (
             <>
               <ActivityIcon activity="custom" size={58} />
-              <YText style={type.section}>This room has gone quiet.</YText>
-              <YText style={styles.missingText}>It may have expired or the link is no longer available.</YText>
+              <YText style={type.section}>{t('This room has gone quiet.')}</YText>
+              <YText style={styles.missingText}>{t('It may have expired or the link is no longer available.')}</YText>
               <ActionButton
-                label="Back to home"
+                label={t('Back to home')}
                 icon="arrow-forward"
                 onPress={() => router.replace('/(tabs)')}
                 style={{ marginTop: spacing.lg }}
@@ -106,6 +113,7 @@ export default function RoomScreen() {
 function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const router = useRouter();
   const { me, people, remoteActive, joinedRoom, leaveRoom } = useDemo();
   const insets = useSafeAreaInsets();
@@ -155,12 +163,12 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
   }, [arrivalOverride, currentUser.id, membershipOverride, room.arrivalByPerson]);
   const currentUserDetail =
     room.creatorId === currentUser.id
-      ? 'Created room'
+      ? t('Created room')
       : arrivalByPerson[currentUser.id]
-        ? arrivalDetail(arrivalByPerson[currentUser.id])
+        ? arrivalDetail(arrivalByPerson[currentUser.id], t)
         : room.arrival
-          ? arrivalDetail(room.arrival)
-          : 'You’re in';
+          ? arrivalDetail(room.arrival, t)
+          : t('You’re in');
   const displayCount = Math.max(
     0,
     room.count +
@@ -240,7 +248,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
   const remoteMessageRows = remoteMessages.data?.map((item: any) => (
     <ChatRow
       key={item.id}
-      name={item.profiles?.display_name ?? 'Friend'}
+      name={item.profiles?.display_name ?? t('Friend')}
       text={item.body}
       people={roomPeople}
       fallback={currentUser}
@@ -285,6 +293,179 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
     }
   };
 
+  const peopleSection = (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.peopleHeading}>
+          <YText style={type.section}>{t('People')}</YText>
+          <YText style={styles.peopleHint}>{t(`${displayCount} ${displayCount === 1 ? 'person' : 'people'}`)}</YText>
+        </View>
+        {canInvite && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('Invite friends')}
+            onPress={() => {
+              tactilePress();
+              setInviteError(false);
+              setInviteOpen(true);
+            }}
+            style={({ pressed }) => [styles.inviteButton, pressed && styles.tactilePressed]}
+          >
+            <Ionicons name="person-add-outline" size={15} color={colors.brandText} />
+            <YText style={styles.inviteButtonText}>{t('Invite')}</YText>
+          </Pressable>
+        )}
+      </View>
+      <View style={styles.peopleCard}>
+        {memberPeople.length ? (
+          memberPeople.map((person) => (
+            <PersonRow
+              key={person.id}
+              person={person}
+              detail={
+                person.id === room.creatorId
+                  ? t('Created room')
+                  : arrivalByPerson[person.id]
+                    ? arrivalDetail(arrivalByPerson[person.id], t)
+                    : t('In the room')
+              }
+            />
+          ))
+        ) : isJoined ? (
+          <PersonRow person={currentUser} detail={currentUserDetail} />
+        ) : (
+          <YText style={styles.peopleEmpty}>{t('No one is in yet.')}</YText>
+        )}
+        {isJoined && memberPeople.length > 0 && <PersonRow person={currentUser} detail={currentUserDetail} />}
+      </View>
+      {inviteNotice ? <YText style={styles.inviteNotice}>{t(inviteNotice)}</YText> : null}
+    </View>
+  );
+  const suggestionsSection = (
+    <>
+      {(suggestions.length > 0 || (!archived && isJoined)) && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <YText style={type.section}>{t('Suggestions')}</YText>
+            {!archived && isJoined && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('Suggest an activity')}
+                onPress={() => {
+                  tactilePress();
+                  setSuggestionError('');
+                  setSuggestOpen(true);
+                }}
+                style={({ pressed }) => [styles.suggestButton, pressed && styles.tactilePressed]}
+              >
+                <Ionicons name="add" size={16} color={colors.brandText} />
+                <YText style={styles.suggestButtonText}>{t('Suggest')}</YText>
+              </Pressable>
+            )}
+          </View>
+          {suggestionError ? <YText style={styles.chatError}>{t(suggestionError)}</YText> : null}
+          {suggestions.length ? (
+            <View style={styles.suggestionList}>
+              {suggestions.map((suggestion) => (
+                <View key={suggestion.id} style={styles.suggestion}>
+                  <ActivityIcon activity={suggestion.activity} size={38} />
+                  <View style={styles.suggestionCopy}>
+                    <YText style={styles.suggestionTitle}>{suggestion.title}</YText>
+                    <YText style={styles.meta}>
+                      {t(
+                        `${suggestion.authorName ?? (suggestion.authorId === currentUser.id ? 'You' : 'Friend')} suggested`,
+                      )}
+                    </YText>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <YText style={styles.suggestionEmpty}>{t('Nothing suggested yet.')}</YText>
+          )}
+        </View>
+      )}
+    </>
+  );
+  const chatSection = (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <YText style={type.section}>{t(copy.room.chat)}</YText>
+      </View>
+      {room.chatEnabled === false ? (
+        <View style={styles.chatOff}>
+          <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.muted} />
+          <YText style={styles.chatOffText}>{t('Room chat is off for this room.')}</YText>
+        </View>
+      ) : (
+        <View style={styles.chatCard}>
+          {!isJoined && !archived ? (
+            <View style={styles.chatJoinPrompt}>
+              <Ionicons name="chatbubble-ellipses-outline" size={21} color={colors.muted} />
+              <YText style={styles.chatOffText}>{t('Join the room to chat with everyone.')}</YText>
+            </View>
+          ) : (
+            <>
+              {remoteMessages.isLoading ? (
+                <View style={styles.chatStatus}>
+                  <ActivityIndicator size="small" color={colors.brandText} />
+                  <YText style={styles.chatStatusText}>{t('Loading chat…')}</YText>
+                </View>
+              ) : remoteMessages.isError ? (
+                <YText style={styles.chatError}>{t('Couldn’t load chat. Try again later.')}</YText>
+              ) : remoteMessages.data ? (
+                remoteMessageRows
+              ) : (
+                fallbackMessageRows
+              )}
+              {sent.map((text, index) => (
+                <View key={`${text}-${index}`} style={[styles.chatRow, styles.myChat]}>
+                  <Avatar person={currentUser} size={28} />
+                  <View style={styles.chatCopy}>
+                    <YText style={styles.chatName}>{t('You')}</YText>
+                    <YText style={styles.chatText}>{text}</YText>
+                  </View>
+                </View>
+              ))}
+              {messageError ? <YText style={styles.chatError}>{t(messageError)}</YText> : null}
+              {!archived && (
+                <View style={styles.composer}>
+                  <TextInput
+                    accessibilityLabel={t('Room message')}
+                    value={message}
+                    onChangeText={setMessage}
+                    editable={!sendingMessage}
+                    onSubmitEditing={() => void sendMessage()}
+                    returnKeyType="send"
+                    placeholder={t('Say something...')}
+                    placeholderTextColor={colors.faint}
+                    style={styles.composerInput}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('Send message')}
+                    disabled={sendingMessage || !message.trim()}
+                    onPress={() => {
+                      tactilePress();
+                      void sendMessage();
+                    }}
+                    style={({ pressed }) => [
+                      styles.sendButton,
+                      pressed && styles.tactilePressed,
+                      (sendingMessage || !message.trim()) && styles.disabledAction,
+                    ]}
+                  >
+                    <Ionicons name="arrow-up" size={18} color={colors.brandInk} />
+                  </Pressable>
+                </View>
+              )}
+            </>
+          )}
+        </View>
+      )}
+    </View>
+  );
+  // Once you are in, the chat is what you use, so it moves to the top.
   return (
     <View style={styles.root}>
       <Backdrop />
@@ -298,7 +479,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
         <View style={styles.nav}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('Go back')}
             onPress={() => {
               if (router.canGoBack()) router.back();
               else router.replace('/(tabs)');
@@ -309,7 +490,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
           </Pressable>
           <View style={styles.navContext}>
             <View style={[styles.navDot, { backgroundColor: meta.color }]} />
-            <YText style={styles.navContextText}>{meta.label}</YText>
+            <YText style={styles.navContextText}>{t(meta.label)}</YText>
           </View>
           <View style={{ width: 44 }} />
         </View>
@@ -317,16 +498,16 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
           <View style={styles.heroTop}>
             <ActivityIcon activity={room.activity} size={54} />
             <View style={styles.heroCopy}>
-              <YText style={styles.heroStatus}>{archived ? 'ENDED' : 'ROOM OPEN'}</YText>
+              <YText style={styles.heroStatus}>{archived ? t('ENDED') : t('ROOM OPEN')}</YText>
               <YText style={styles.heroTitle}>{displayTitle(room.title)}</YText>
-              <YText style={styles.heroTime}>{room.time}</YText>
+              <YText style={styles.heroTime}>{t(room.time)}</YText>
             </View>
           </View>
-          {room.detail && <YText style={styles.heroDetail}>{room.detail}</YText>}
+          {room.detail && <YText style={styles.heroDetail}>{t(room.detail)}</YText>}
           {archived && (
             <View style={styles.archiveBanner}>
               <Ionicons name="archive-outline" size={17} color={colors.muted} />
-              <YText style={styles.archiveText}>This room has ended. Chat is read-only.</YText>
+              <YText style={styles.archiveText}>{t('This room has ended. Chat is read-only.')}</YText>
             </View>
           )}
         </View>
@@ -339,22 +520,22 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
             />
           </View>
           <View style={styles.infoCopy}>
-            <YText style={styles.infoTitle}>{room.online ?? room.location ?? 'Decide together'}</YText>
+            <YText style={styles.infoTitle}>{room.online ?? room.location ?? t('Decide together')}</YText>
             <YText style={styles.meta}>
-              {link ? (isJoined ? 'Jump straight in' : 'Link opens after you join') : 'Shared with the room'}
+              {link ? (isJoined ? t('Jump straight in') : t('Link opens after you join')) : t('Shared with the room')}
             </YText>
           </View>
           {link && isJoined ? (
             <Pressable
               accessibilityRole="link"
-              accessibilityLabel="Open link"
+              accessibilityLabel={t('Open link')}
               onPress={() => {
                 tactilePress();
                 void Linking.openURL(link);
               }}
               style={({ pressed }) => [styles.linkButton, pressed && styles.tactilePressed]}
             >
-              <YText style={styles.linkText}>Open</YText>
+              <YText style={styles.linkText}>{t('Open')}</YText>
               <Ionicons name="open-outline" size={15} color={colors.brandInk} />
             </Pressable>
           ) : null}
@@ -374,7 +555,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
                     membershipPending && styles.disabledAction,
                   ]}
                 >
-                  <YText style={styles.leaveText}>{membershipPending ? 'Updating…' : 'Leave room'}</YText>
+                  <YText style={styles.leaveText}>{membershipPending ? t('Updating…') : t('Leave room')}</YText>
                 </Pressable>
               </>
             ) : (
@@ -386,7 +567,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
                 />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Yeb, but later"
+                  accessibilityLabel={t('Yeb, but later')}
                   disabled={membershipPending}
                   onPress={() => {
                     tactilePress();
@@ -398,7 +579,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
                     membershipPending && styles.disabledAction,
                   ]}
                 >
-                  <YText style={styles.laterText}>Yeb, but later</YText>
+                  <YText style={styles.laterText}>{t('Yeb, but later')}</YText>
                   <Ionicons name="time-outline" size={17} color={colors.ink} />
                 </Pressable>
               </>
@@ -408,171 +589,11 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
             </View>
           </View>
         )}
-        {membershipError ? <YText style={styles.actionError}>{membershipError}</YText> : null}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.peopleHeading}>
-              <YText style={type.section}>People</YText>
-              <YText style={styles.peopleHint}>
-                {displayCount} {displayCount === 1 ? 'person' : 'people'}
-              </YText>
-            </View>
-            {canInvite && (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Invite friends"
-                onPress={() => {
-                  tactilePress();
-                  setInviteError(false);
-                  setInviteOpen(true);
-                }}
-                style={({ pressed }) => [styles.inviteButton, pressed && styles.tactilePressed]}
-              >
-                <Ionicons name="person-add-outline" size={15} color={colors.brandText} />
-                <YText style={styles.inviteButtonText}>Invite</YText>
-              </Pressable>
-            )}
-          </View>
-          <View style={styles.peopleCard}>
-            {memberPeople.length ? (
-              memberPeople.map((person) => (
-                <PersonRow
-                  key={person.id}
-                  person={person}
-                  detail={
-                    person.id === room.creatorId
-                      ? 'Created room'
-                      : arrivalByPerson[person.id]
-                        ? arrivalDetail(arrivalByPerson[person.id])
-                        : 'In the room'
-                  }
-                />
-              ))
-            ) : isJoined ? (
-              <PersonRow person={currentUser} detail={currentUserDetail} />
-            ) : (
-              <YText style={styles.peopleEmpty}>No one is in yet.</YText>
-            )}
-            {isJoined && memberPeople.length > 0 && <PersonRow person={currentUser} detail={currentUserDetail} />}
-          </View>
-          {inviteNotice ? <YText style={styles.inviteNotice}>{inviteNotice}</YText> : null}
-        </View>
-        {(suggestions.length > 0 || (!archived && isJoined)) && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <YText style={type.section}>Suggestions</YText>
-              {!archived && isJoined && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Suggest an activity"
-                  onPress={() => {
-                    tactilePress();
-                    setSuggestionError('');
-                    setSuggestOpen(true);
-                  }}
-                  style={({ pressed }) => [styles.suggestButton, pressed && styles.tactilePressed]}
-                >
-                  <Ionicons name="add" size={16} color={colors.brandText} />
-                  <YText style={styles.suggestButtonText}>Suggest</YText>
-                </Pressable>
-              )}
-            </View>
-            {suggestionError ? <YText style={styles.chatError}>{suggestionError}</YText> : null}
-            {suggestions.length ? (
-              <View style={styles.suggestionList}>
-                {suggestions.map((suggestion) => (
-                  <View key={suggestion.id} style={styles.suggestion}>
-                    <ActivityIcon activity={suggestion.activity} size={38} />
-                    <View style={styles.suggestionCopy}>
-                      <YText style={styles.suggestionTitle}>{suggestion.title}</YText>
-                      <YText style={styles.meta}>
-                        {suggestion.authorName ?? (suggestion.authorId === currentUser.id ? 'You' : 'Friend')} suggested
-                      </YText>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <YText style={styles.suggestionEmpty}>Nothing suggested yet.</YText>
-            )}
-          </View>
-        )}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <YText style={type.section}>{copy.room.chat}</YText>
-          </View>
-          {room.chatEnabled === false ? (
-            <View style={styles.chatOff}>
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.muted} />
-              <YText style={styles.chatOffText}>Room chat is off for this room.</YText>
-            </View>
-          ) : (
-            <View style={styles.chatCard}>
-              {!isJoined && !archived ? (
-                <View style={styles.chatJoinPrompt}>
-                  <Ionicons name="chatbubble-ellipses-outline" size={21} color={colors.muted} />
-                  <YText style={styles.chatOffText}>Join the room to chat with everyone.</YText>
-                </View>
-              ) : (
-                <>
-                  {remoteMessages.isLoading ? (
-                    <View style={styles.chatStatus}>
-                      <ActivityIndicator size="small" color={colors.brandText} />
-                      <YText style={styles.chatStatusText}>Loading chat…</YText>
-                    </View>
-                  ) : remoteMessages.isError ? (
-                    <YText style={styles.chatError}>Couldn’t load chat. Try again later.</YText>
-                  ) : remoteMessages.data ? (
-                    remoteMessageRows
-                  ) : (
-                    fallbackMessageRows
-                  )}
-                  {sent.map((text, index) => (
-                    <View key={`${text}-${index}`} style={[styles.chatRow, styles.myChat]}>
-                      <Avatar person={currentUser} size={28} />
-                      <View style={styles.chatCopy}>
-                        <YText style={styles.chatName}>You</YText>
-                        <YText style={styles.chatText}>{text}</YText>
-                      </View>
-                    </View>
-                  ))}
-                  {messageError ? <YText style={styles.chatError}>{messageError}</YText> : null}
-                  {!archived && (
-                    <View style={styles.composer}>
-                      <TextInput
-                        accessibilityLabel="Room message"
-                        value={message}
-                        onChangeText={setMessage}
-                        editable={!sendingMessage}
-                        onSubmitEditing={() => void sendMessage()}
-                        returnKeyType="send"
-                        placeholder="Say something..."
-                        placeholderTextColor={colors.faint}
-                        style={styles.composerInput}
-                      />
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="Send message"
-                        disabled={sendingMessage || !message.trim()}
-                        onPress={() => {
-                          tactilePress();
-                          void sendMessage();
-                        }}
-                        style={({ pressed }) => [
-                          styles.sendButton,
-                          pressed && styles.tactilePressed,
-                          (sendingMessage || !message.trim()) && styles.disabledAction,
-                        ]}
-                      >
-                        <Ionicons name="arrow-up" size={18} color={colors.brandInk} />
-                      </Pressable>
-                    </View>
-                  )}
-                </>
-              )}
-            </View>
-          )}
-        </View>
+        {membershipError ? <YText style={styles.actionError}>{t(membershipError)}</YText> : null}
+        {isJoined && chatSection}
+        {peopleSection}
+        {suggestionsSection}
+        {!isJoined && chatSection}
       </ScrollView>
       <LaterModal
         visible={laterOpen}
@@ -658,6 +679,7 @@ function InviteModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const close = () => {
     setSelectedIds([]);
@@ -674,19 +696,19 @@ function InviteModal({
         <View style={styles.inviteSheet}>
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>BRING THEM ALONG</YText>
-              <YText style={type.section}>Who should we invite?</YText>
+              <YText style={styles.kicker}>{t('BRING THEM ALONG')}</YText>
+              <YText style={type.section}>{t('Who should we invite?')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close invite friends"
+              accessibilityLabel={t('Close invite friends')}
               onPress={close}
               style={styles.modalClose}
             >
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
-          <YText style={styles.inviteHelper}>Only your accepted Yubrio friends can receive this invite.</YText>
+          <YText style={styles.inviteHelper}>{t('Only your accepted Yubrio friends can receive this invite.')}</YText>
           <ScrollView
             style={styles.inviteScroll}
             contentContainerStyle={[styles.inviteList, !people.length && styles.inviteListEmpty]}
@@ -717,17 +739,17 @@ function InviteModal({
                 );
               })
             ) : (
-              <View accessible accessibilityLabel="No friends left to invite" style={styles.inviteEmpty}>
+              <View accessible accessibilityLabel={t('No friends left to invite')} style={styles.inviteEmpty}>
                 <Ionicons name="checkmark-circle-outline" size={24} color={colors.brandText} />
-                <YText style={styles.inviteEmptyTitle}>Everyone’s already in.</YText>
-                <YText style={styles.inviteEmptyCopy}>There are no other friends to invite right now.</YText>
+                <YText style={styles.inviteEmptyTitle}>{t('Everyone’s already in.')}</YText>
+                <YText style={styles.inviteEmptyCopy}>{t('There are no other friends to invite right now.')}</YText>
               </View>
             )}
           </ScrollView>
-          {error && <YText style={styles.inviteError}>Couldn’t send those invites. Try again.</YText>}
+          {error && <YText style={styles.inviteError}>{t('Couldn’t send those invites. Try again.')}</YText>}
           {people.length ? (
             <ActionButton
-              label="Send invites"
+              label={t('Send invites')}
               icon="paper-plane-outline"
               disabled={!selectedIds.length}
               onPress={send}
@@ -751,6 +773,7 @@ function SuggestModal({
 }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [activity, setActivity] = useState<ActivityType>('food');
   const [title, setTitle] = useState('');
   const close = () => {
@@ -771,12 +794,12 @@ function SuggestModal({
           <View style={styles.sheetHandle} />
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>A SMALL IDEA</YText>
-              <YText style={type.section}>What should we try?</YText>
+              <YText style={styles.kicker}>{t('A SMALL IDEA')}</YText>
+              <YText style={type.section}>{t('What should we try?')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close suggestion"
+              accessibilityLabel={t('Close suggestion')}
               onPress={close}
               style={styles.modalClose}
             >
@@ -797,20 +820,20 @@ function SuggestModal({
                 ]}
               >
                 <ActivityIcon activity={item} size={31} />
-                <YText style={styles.suggestionChoiceText}>{activityMeta[item].label}</YText>
+                <YText style={styles.suggestionChoiceText}>{t(activityMeta[item].label)}</YText>
               </Pressable>
             ))}
           </View>
           <TextInput
-            accessibilityLabel="Suggestion"
+            accessibilityLabel={t('Suggestion')}
             value={title}
             onChangeText={setTitle}
-            placeholder="e.g. Grab food together"
+            placeholder={t('e.g. Grab food together')}
             placeholderTextColor={colors.faint}
             style={styles.suggestionInput}
           />
           <ActionButton
-            label="Suggest it"
+            label={t('Suggest it')}
             icon="sparkles"
             disabled={!title.trim()}
             onPress={create}
@@ -833,6 +856,7 @@ function LaterModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [custom, setCustom] = useState('');
   const customValid = isValidClockTime(custom);
   const choose = (arrival: string) => {
@@ -850,10 +874,15 @@ function LaterModal({
           <View style={styles.sheetHandle} />
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>NO RUSH</YText>
-              <YText style={type.section}>When will you join?</YText>
+              <YText style={styles.kicker}>{t('NO RUSH')}</YText>
+              <YText style={type.section}>{t('When will you join?')}</YText>
             </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={close} style={styles.modalClose}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('Close')}
+              onPress={close}
+              style={styles.modalClose}
+            >
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
@@ -861,22 +890,22 @@ function LaterModal({
             <Pressable
               key={choice}
               accessibilityRole="button"
-              accessibilityLabel={choice}
+              accessibilityLabel={t(choice)}
               onPress={() => choose(choice)}
               style={styles.arrivalChoice}
             >
               <View style={styles.clockIcon}>
                 <Ionicons name="time-outline" size={18} color={colors.brandInk} />
               </View>
-              <YText style={styles.arrivalText}>{choice}</YText>
+              <YText style={styles.arrivalText}>{t(choice)}</YText>
               <Ionicons name="arrow-forward" size={18} color={colors.faint} />
             </Pressable>
           ))}
           <TextInput
-            accessibilityLabel="Custom arrival time"
+            accessibilityLabel={t('Custom arrival time')}
             value={custom}
             onChangeText={setCustom}
-            placeholder="Custom time · e.g. 19:30"
+            placeholder={t('Custom time · e.g. 19:30')}
             placeholderTextColor={colors.faint}
             style={{
               minHeight: 52,
@@ -888,10 +917,12 @@ function LaterModal({
               marginTop: 10,
             }}
           />
-          {custom.trim() && !customValid ? <YText style={styles.arrivalError}>Use a time like 19:30.</YText> : null}
+          {custom.trim() && !customValid ? (
+            <YText style={styles.arrivalError}>{t('Use a time like 19:30.')}</YText>
+          ) : null}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Use custom arrival time"
+            accessibilityLabel={t('Use custom arrival time')}
             accessibilityState={{ disabled: !customValid }}
             disabled={!customValid}
             onPress={() => choose(`around ${custom.trim()}`)}
@@ -900,7 +931,7 @@ function LaterModal({
             <View style={styles.clockIcon}>
               <Ionicons name="create-outline" size={18} color={colors.brandInk} />
             </View>
-            <YText style={styles.arrivalText}>Use this time</YText>
+            <YText style={styles.arrivalText}>{t('Use this time')}</YText>
             <Ionicons name="arrow-forward" size={18} color={colors.faint} />
           </Pressable>
         </View>
@@ -909,8 +940,8 @@ function LaterModal({
   );
 }
 
-function arrivalDetail(arrival: string) {
-  return `Joining ${arrival}`;
+function arrivalDetail(arrival: string, t: Translate) {
+  return t(`Joining ${arrival}`);
 }
 
 function mapRemoteRoom(row: any, userId: string): Room {

@@ -18,6 +18,7 @@ import { ActionButton, ActivityIcon, Avatar, SectionTitle, YText } from '@/compo
 import { AvailabilitySheet } from '@/components/sheets';
 import { radius, spacing, type, Colors, Scheme } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
+import { Language, useLanguage, useT } from '@/design/i18n';
 import { useDemo } from '@/stores/demo-store';
 import { useAuth } from '@/stores/auth-store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +35,7 @@ const defaultNotificationPreferences: NotificationPreferences = { availability: 
 export default function YouScreen() {
   const { colors, scheme, setScheme } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { language, setLanguage, t } = useLanguage();
   const [freeOpen, setFreeOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -154,7 +156,7 @@ export default function YouScreen() {
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('Go back')}
           onPress={() => {
             if (router.canGoBack()) router.back();
             else router.replace('/(tabs)');
@@ -163,7 +165,7 @@ export default function YouScreen() {
         >
           <Ionicons name="arrow-back" size={21} color={colors.ink} />
         </Pressable>
-        <YText style={type.title}>You</YText>
+        <YText style={type.title}>{t('You')}</YText>
         <View style={styles.profile}>
           <Avatar person={currentUser} size={68} />
           <View style={styles.profileCopy}>
@@ -172,7 +174,7 @@ export default function YouScreen() {
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Edit profile"
+            accessibilityLabel={t('Edit profile')}
             onPress={openProfile}
             style={styles.editButton}
           >
@@ -200,23 +202,25 @@ export default function YouScreen() {
                 <View style={styles.signal}>
                   <View style={styles.signalDot} />
                   <YText style={styles.signalText}>
-                    {isAvailabilityUpcoming(currentAvailability.startsAt) ? 'Free later' : 'You’re available'}
+                    {t(isAvailabilityUpcoming(currentAvailability.startsAt) ? 'Free later' : 'You’re available')}
                   </YText>
                 </View>
                 <YText style={styles.expires}>
-                  {currentAvailability.expiresAt
-                    ? formatAvailabilityTime(currentAvailability.expiresAt, currentAvailability.startsAt)
-                    : currentAvailability.expiresIn}
+                  {t(
+                    currentAvailability.expiresAt
+                      ? formatAvailabilityTime(currentAvailability.expiresAt, currentAvailability.startsAt)
+                      : currentAvailability.expiresIn,
+                  )}
                 </YText>
               </View>
-              <YText style={styles.availabilityTitle}>{currentAvailability.note || 'Up for anything.'}</YText>
+              <YText style={styles.availabilityTitle}>{currentAvailability.note || t('Up for anything.')}</YText>
               <YText style={styles.availabilityCopy}>
-                Visible to {audienceLabel(currentAvailability.audience)} ·{' '}
-                {currentAvailability.canMessage ? 'Messages on' : 'Messages off'}
+                {t(`Visible to ${audienceLabel(currentAvailability.audience)}`)} ·{' '}
+                {t(currentAvailability.canMessage ? 'Messages on' : 'Messages off')}
               </YText>
               <View style={styles.availabilityActions}>
                 <ActionButton
-                  label="Change availability"
+                  label={t('Change availability')}
                   icon="options-outline"
                   variant="secondary"
                   onPress={() => setFreeOpen(true)}
@@ -234,12 +238,12 @@ export default function YouScreen() {
                   }}
                   style={[styles.endButton, availabilityPending && styles.disabledAction]}
                 >
-                  <YText style={styles.endText}>{availabilityPending ? 'Ending…' : 'End'}</YText>
+                  <YText style={styles.endText}>{t(availabilityPending ? 'Ending…' : 'End')}</YText>
                 </Pressable>
               </View>
               {availabilityError ? (
                 <YText accessibilityRole="alert" style={styles.error}>
-                  {availabilityError}
+                  {t(availabilityError)}
                 </YText>
               ) : null}
             </>
@@ -248,10 +252,12 @@ export default function YouScreen() {
               <View style={styles.quietIcon}>
                 <Ionicons name="radio-button-on-outline" size={22} color={colors.brandText} />
               </View>
-              <YText style={styles.availabilityTitle}>You’re not marked free.</YText>
-              <YText style={styles.availabilityCopy}>Let your people know when you have room for something.</YText>
+              <YText style={styles.availabilityTitle}>{t('You’re not marked free.')}</YText>
+              <YText style={styles.availabilityCopy}>
+                {t('Let your people know when you have room for something.')}
+              </YText>
               <ActionButton
-                label="I’m free"
+                label={t('I’m free')}
                 icon="radio-button-on"
                 onPress={() => setFreeOpen(true)}
                 style={{ marginTop: spacing.xl }}
@@ -260,14 +266,14 @@ export default function YouScreen() {
           )}
         </View>
         <View style={styles.sectionGap} />
-        <SectionTitle>Your rooms</SectionTitle>
+        <SectionTitle>{t('Your rooms')}</SectionTitle>
         {myRooms.length ? (
           <View style={styles.settings}>
             {myRooms.map((room) => (
               <Pressable
                 key={room.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Open ${displayTitle(room.title)}`}
+                accessibilityLabel={t(`Open ${displayTitle(room.title)}`)}
                 onPress={() => router.push({ pathname: '/room/[id]', params: { id: room.id } })}
                 style={({ pressed }) => [styles.settingRow, pressed && styles.rowPressed]}
               >
@@ -277,7 +283,7 @@ export default function YouScreen() {
                     {displayTitle(room.title)}
                   </YText>
                   <YText style={styles.settingDescription} numberOfLines={1}>
-                    {room.time} · {room.creatorId === currentUser.id ? 'You opened it' : 'You’re in'}
+                    {t(room.time)} · {t(room.creatorId === currentUser.id ? 'You opened it' : 'You’re in')}
                   </YText>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.faint} />
@@ -286,9 +292,11 @@ export default function YouScreen() {
           </View>
         ) : (
           <View style={styles.roomsEmpty}>
-            <YText style={styles.availabilityCopy}>Nothing planned yet. Rooms you open or join show up here.</YText>
+            <YText style={styles.availabilityCopy}>
+              {t('Nothing planned yet. Rooms you open or join show up here.')}
+            </YText>
             <ActionButton
-              label="Open a room"
+              label={t('Open a room')}
               icon="add"
               variant="secondary"
               onPress={() => router.push('/(tabs)/create')}
@@ -297,26 +305,50 @@ export default function YouScreen() {
           </View>
         )}
         <View style={styles.sectionGap} />
-        <SectionTitle>Preferences</SectionTitle>
+        <SectionTitle>{t('Preferences')}</SectionTitle>
         <View style={styles.settings}>
           <View style={styles.settingRow}>
             <View style={styles.settingIcon}>
               <Ionicons name="contrast-outline" size={19} color={colors.ink} />
             </View>
             <View style={styles.settingCopy}>
-              <YText style={styles.settingTitle}>Appearance</YText>
+              <YText style={styles.settingTitle}>{t('Appearance')}</YText>
             </View>
             <View accessibilityRole="radiogroup" style={styles.modeRow}>
               {themeChoices.map((item) => (
                 <Pressable
                   key={item.scheme}
                   accessibilityRole="radio"
-                  accessibilityLabel={`Appearance: ${item.label}`}
+                  accessibilityLabel={`${t('Appearance')}: ${t(item.label)}`}
                   accessibilityState={{ selected: scheme === item.scheme }}
                   onPress={() => setScheme(item.scheme)}
                   style={[styles.modeChip, scheme === item.scheme && styles.modeChipSelected]}
                 >
                   <YText style={[styles.modeText, scheme === item.scheme && styles.modeTextSelected]}>
+                    {t(item.label)}
+                  </YText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+          <View style={styles.settingRow}>
+            <View style={styles.settingIcon}>
+              <Ionicons name="language-outline" size={19} color={colors.ink} />
+            </View>
+            <View style={styles.settingCopy}>
+              <YText style={styles.settingTitle}>{t('Language')}</YText>
+            </View>
+            <View accessibilityRole="radiogroup" style={styles.modeRow}>
+              {languageChoices.map((item) => (
+                <Pressable
+                  key={item.language}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`${t('Language')}: ${item.label}`}
+                  accessibilityState={{ selected: language === item.language }}
+                  onPress={() => setLanguage(item.language)}
+                  style={[styles.modeChip, language === item.language && styles.modeChipSelected]}
+                >
+                  <YText style={[styles.modeText, language === item.language && styles.modeTextSelected]}>
                     {item.label}
                   </YText>
                 </Pressable>
@@ -325,7 +357,7 @@ export default function YouScreen() {
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Notification preferences"
+            accessibilityLabel={t('Notification preferences')}
             onPress={() => setNotificationsOpen(true)}
             style={styles.settingRow}
           >
@@ -333,15 +365,15 @@ export default function YouScreen() {
               <Ionicons name="notifications-outline" size={19} color={colors.ink} />
             </View>
             <View style={styles.settingCopy}>
-              <YText style={styles.settingTitle}>Notifications</YText>
-              <YText style={styles.settingDescription}>Keep up with the good stuff</YText>
+              <YText style={styles.settingTitle}>{t('Notifications')}</YText>
+              <YText style={styles.settingDescription}>{t('Keep up with the good stuff')}</YText>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.faint} />
           </Pressable>
           {session && (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Sign out"
+              accessibilityLabel={t('Sign out')}
               disabled={signingOut}
               onPress={() => {
                 setSigningOut(true);
@@ -356,15 +388,15 @@ export default function YouScreen() {
                 <Ionicons name="log-out-outline" size={19} color={colors.muted} />
               </View>
               <View style={styles.settingCopy}>
-                <YText style={styles.settingTitle}>{signingOut ? 'Signing out…' : 'Sign out'}</YText>
-                <YText style={styles.settingDescription}>You can come back anytime</YText>
+                <YText style={styles.settingTitle}>{t(signingOut ? 'Signing out…' : 'Sign out')}</YText>
+                <YText style={styles.settingDescription}>{t('You can come back anytime')}</YText>
               </View>
             </Pressable>
           )}
         </View>
         {accountError ? (
           <YText accessibilityRole="alert" style={styles.error}>
-            {accountError}
+            {t(accountError)}
           </YText>
         ) : null}
       </ScrollView>
@@ -428,6 +460,11 @@ function audienceLabel(audience?: string) {
 const themeChoices: { scheme: Scheme; label: string }[] = [
   { scheme: 'dark', label: 'Dark' },
   { scheme: 'glass', label: 'Glass' },
+];
+
+const languageChoices: { language: Language; label: string }[] = [
+  { language: 'de', label: 'Deutsch' },
+  { language: 'en', label: 'English' },
 ];
 
 const makeStyles = (colors: Colors) =>
@@ -634,18 +671,19 @@ function EditProfileModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.preferenceBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.preferenceSheet}>
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>YOUR PROFILE</YText>
-              <YText style={type.section}>What should friends call you?</YText>
+              <YText style={styles.kicker}>{t('YOUR PROFILE')}</YText>
+              <YText style={type.section}>{t('What should friends call you?')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close profile editor"
+              accessibilityLabel={t('Close profile editor')}
               disabled={pending}
               onPress={onClose}
               style={[styles.modalClose, pending && styles.disabledAction]}
@@ -653,9 +691,9 @@ function EditProfileModal({
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
-          <YText style={styles.preferenceIntro}>This is the name people see when you open something.</YText>
+          <YText style={styles.preferenceIntro}>{t('This is the name people see when you open something.')}</YText>
           <TextInput
-            accessibilityLabel="Display name"
+            accessibilityLabel={t('Display name')}
             value={name}
             onChangeText={onChange}
             autoCapitalize="words"
@@ -663,17 +701,17 @@ function EditProfileModal({
             maxLength={60}
             returnKeyType="done"
             onSubmitEditing={onSave}
-            placeholder="Your name"
+            placeholder={t('Your name')}
             placeholderTextColor={colors.faint}
             style={styles.profileInput}
           />
           {error ? (
             <YText accessibilityRole="alert" style={styles.error}>
-              {error}
+              {t(error)}
             </YText>
           ) : null}
           <ActionButton
-            label={pending ? 'Saving…' : 'Save profile'}
+            label={t(pending ? 'Saving…' : 'Save profile')}
             icon="checkmark"
             disabled={pending || !name.trim()}
             onPress={onSave}
@@ -708,6 +746,7 @@ function NotificationPreferencesModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const rows: {
     key: keyof NotificationPreferences;
     icon: keyof typeof Ionicons.glyphMap;
@@ -751,19 +790,21 @@ function NotificationPreferencesModal({
         <View style={styles.preferenceSheet}>
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>PREFERENCES</YText>
-              <YText style={type.section}>Notifications</YText>
+              <YText style={styles.kicker}>{t('PREFERENCES')}</YText>
+              <YText style={type.section}>{t('Notifications')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close notification preferences"
+              accessibilityLabel={t('Close notification preferences')}
               onPress={onClose}
               style={styles.modalClose}
             >
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
-          <YText style={styles.preferenceIntro}>Choose the moments worth a nudge. You can change this anytime.</YText>
+          <YText style={styles.preferenceIntro}>
+            {t('Choose the moments worth a nudge. You can change this anytime.')}
+          </YText>
           <View style={styles.pushRow}>
             <View style={styles.pushIcon}>
               <Ionicons
@@ -773,17 +814,17 @@ function NotificationPreferencesModal({
               />
             </View>
             <View style={styles.settingCopy}>
-              <YText style={styles.settingTitle}>Push alerts</YText>
-              <YText style={styles.settingDescription}>{pushLabel}</YText>
+              <YText style={styles.settingTitle}>{t('Push alerts')}</YText>
+              <YText style={styles.settingDescription}>{t(pushLabel)}</YText>
             </View>
             {pushStatus === 'granted' ? (
-              <View accessible accessibilityLabel="Push alerts enabled" style={styles.pushEnabled}>
+              <View accessible accessibilityLabel={t('Push alerts enabled')} style={styles.pushEnabled}>
                 <Ionicons name="checkmark" size={15} color={colors.brandInk} />
               </View>
             ) : canEnablePush ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Enable push alerts"
+                accessibilityLabel={t('Enable push alerts')}
                 disabled={pushPending || pushUnavailable}
                 onPress={onEnablePush}
                 style={({ pressed }) => [
@@ -792,13 +833,13 @@ function NotificationPreferencesModal({
                   (pushPending || pushUnavailable) && styles.disabledAction,
                 ]}
               >
-                <YText style={styles.pushEnableText}>{pushPending ? 'Enabling…' : 'Enable'}</YText>
+                <YText style={styles.pushEnableText}>{t(pushPending ? 'Enabling…' : 'Enable')}</YText>
               </Pressable>
             ) : null}
           </View>
           {pushError ? (
             <YText accessibilityRole="alert" style={styles.error}>
-              {pushError}
+              {t(pushError)}
             </YText>
           ) : null}
           <View style={styles.preferenceList}>
@@ -808,11 +849,11 @@ function NotificationPreferencesModal({
                   <Ionicons name={row.icon} size={19} color={colors.ink} />
                 </View>
                 <View style={styles.settingCopy}>
-                  <YText style={styles.settingTitle}>{row.title}</YText>
-                  <YText style={styles.settingDescription}>{row.description}</YText>
+                  <YText style={styles.settingTitle}>{t(row.title)}</YText>
+                  <YText style={styles.settingDescription}>{t(row.description)}</YText>
                 </View>
                 <Switch
-                  accessibilityLabel={row.title}
+                  accessibilityLabel={t(row.title)}
                   value={preferences[row.key]}
                   onValueChange={(value) => onChange(row.key, value)}
                   trackColor={{ false: colors.surfaceMuted, true: colors.brand }}
@@ -822,7 +863,7 @@ function NotificationPreferencesModal({
             ))}
           </View>
           <Pressable accessibilityRole="button" onPress={onClose} style={styles.preferenceDone}>
-            <YText style={styles.preferenceDoneText}>Done</YText>
+            <YText style={styles.preferenceDoneText}>{t('Done')}</YText>
           </Pressable>
         </View>
       </View>

@@ -4,10 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { sticker } from '@/design/tokens';
 import { GlassBackdrop } from '@/components/ui';
 import { useTheme } from '@/design/theme';
+import { useT } from '@/design/i18n';
 
 export default function TabLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const t = useT();
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -38,13 +40,13 @@ export default function TabLayout() {
         },
       })}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="index" options={{ title: t('Home') }} />
       <Tabs.Screen
         name="create"
         options={{
-          title: 'Open',
-          tabBarShowLabel: false,
-          tabBarAccessibilityLabel: 'Open a room',
+          title: t('Open'),
+          tabBarLabel: () => null,
+          tabBarAccessibilityLabel: t('Open a room'),
           tabBarActiveTintColor: colors.brandInk,
           tabBarInactiveTintColor: colors.brandInk,
           tabBarItemStyle: {
@@ -57,7 +59,7 @@ export default function TabLayout() {
           },
         }}
       />
-      <Tabs.Screen name="friends" options={{ title: 'Friends' }} />
+      <Tabs.Screen name="friends" options={{ title: t('Friends') }} />
     </Tabs>
   );
 }

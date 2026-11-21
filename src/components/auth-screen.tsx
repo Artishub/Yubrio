@@ -5,10 +5,12 @@ import { ActionButton, YText } from '@/components/ui';
 import { radius, spacing, type, Colors } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { useAuth } from '@/stores/auth-store';
+import { useT } from '@/design/i18n';
 
 export function AuthScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const { signInWithEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -42,31 +44,36 @@ export function AuthScreen() {
           <View style={styles.sentIcon}>
             <Ionicons name="mail-outline" size={28} color={colors.brandInk} />
           </View>
-          <YText style={type.title}>Check your inbox.</YText>
-          <YText style={styles.body}>{`Your sign-in link is on its way to ${email}.`}</YText>
+          <YText style={type.title}>{t('Check your inbox.')}</YText>
+          <YText style={styles.body}>{t(`Your sign-in link is on its way to ${email}.`)}</YText>
           <Pressable accessibilityRole="button" onPress={() => setSent(false)} style={styles.textButton}>
-            <YText style={styles.textButtonLabel}>Use a different email</YText>
+            <YText style={styles.textButtonLabel}>{t('Use a different email')}</YText>
           </Pressable>
         </View>
       ) : (
         <View style={styles.form}>
-          <YText style={type.title}>See your people more.</YText>
-          <YText style={styles.body}>Sign in to see who’s free and open something spontaneous.</YText>
-          <YText style={styles.label}>EMAIL</YText>
+          <YText style={type.title}>{t('See your people more.')}</YText>
+          <YText style={styles.body}>{t('Sign in to see who’s free and open something spontaneous.')}</YText>
+          <YText style={styles.label}>{t('EMAIL')}</YText>
           <TextInput
-            accessibilityLabel="Email address"
+            accessibilityLabel={t('Email address')}
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
-            placeholder="you@example.com"
+            placeholder={t('you@example.com')}
             placeholderTextColor={colors.faint}
             style={styles.input}
           />
-          {error ? <YText style={styles.error}>{error}</YText> : null}
-          <ActionButton label="Send sign-in link" icon="arrow-forward" onPress={submit} style={{ marginTop: 14 }} />
-          <YText style={styles.privacy}>No password to remember. You can turn off emails anytime.</YText>
+          {error ? <YText style={styles.error}>{t(error)}</YText> : null}
+          <ActionButton
+            label={t('Send sign-in link')}
+            icon="arrow-forward"
+            onPress={submit}
+            style={{ marginTop: 14 }}
+          />
+          <YText style={styles.privacy}>{t('No password to remember. You can turn off emails anytime.')}</YText>
         </View>
       )}
     </KeyboardAvoidingView>

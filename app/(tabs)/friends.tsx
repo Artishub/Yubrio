@@ -31,10 +31,12 @@ import { useAuth } from '@/stores/auth-store';
 import { queryClient } from '@/lib/query/client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { copy } from '@/design/copy';
+import { useT } from '@/design/i18n';
 
 export default function FriendsScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const { me, people, circles, addCircle } = useDemo();
   const router = useRouter();
   const { session } = useAuth();
@@ -98,16 +100,16 @@ export default function FriendsScreen() {
       >
         <View style={styles.header}>
           <View>
-            <YText style={type.title}>Friends</YText>
+            <YText style={type.title}>{t('Friends')}</YText>
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Add friend"
+            accessibilityLabel={t('Add friend')}
             onPress={openAdd}
             style={({ pressed }) => [styles.addButton, pressed && styles.actionPressed]}
           >
             <Ionicons name="person-add-outline" size={17} color={colors.brandInk} />
-            <YText style={styles.addButtonText}>Add</YText>
+            <YText style={styles.addButtonText}>{t('Add')}</YText>
           </Pressable>
         </View>
         {friendPeople.length ? (
@@ -134,15 +136,15 @@ export default function FriendsScreen() {
               ))}
             </View>
             <View style={styles.summaryCopy}>
-              <YText style={styles.summaryTitle}>{friendPeople.length + ' friends on Yubrio'}</YText>
-              <YText style={styles.summaryDescription}>The good kind of close circle.</YText>
+              <YText style={styles.summaryTitle}>{t(friendPeople.length + ' friends on Yubrio')}</YText>
+              <YText style={styles.summaryDescription}>{t('The good kind of close circle.')}</YText>
             </View>
             <Ionicons name="sparkles-outline" size={20} color={colors.brandText} />
           </View>
         ) : (
           <EmptyFriendInvite onPress={openAdd} />
         )}
-        <SectionTitle>Circles</SectionTitle>
+        <SectionTitle>{t('Circles')}</SectionTitle>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -169,15 +171,17 @@ export default function FriendsScreen() {
                 {circle.name}
               </YText>
               <YText style={styles.circleCount}>
-                {circle.memberIds.length
-                  ? circle.memberIds.length + ' ' + (circle.memberIds.length === 1 ? 'friend' : 'friends')
-                  : 'No friends yet'}
+                {t(
+                  circle.memberIds.length
+                    ? circle.memberIds.length + ' ' + (circle.memberIds.length === 1 ? 'friend' : 'friends')
+                    : 'No friends yet',
+                )}
               </YText>
             </View>
           ))}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Create a new circle"
+            accessibilityLabel={t('Create a new circle')}
             onPress={openCircle}
             style={({ pressed }) => [
               styles.circleCard,
@@ -189,24 +193,24 @@ export default function FriendsScreen() {
             <View style={styles.newCircleIcon}>
               <Ionicons name="add" size={20} color={colors.muted} />
             </View>
-            <YText style={styles.circleName}>New circle</YText>
+            <YText style={styles.circleName}>{t('New circle')}</YText>
           </Pressable>
         </ScrollView>
         {pendingRequests.isError && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Retry loading friend requests"
+            accessibilityLabel={t('Retry loading friend requests')}
             onPress={() => void pendingRequests.refetch()}
             style={styles.requestError}
           >
             <Ionicons name="cloud-offline-outline" size={17} color={colors.error} />
-            <YText style={styles.requestErrorText}>Couldn’t load friend requests. Tap to retry.</YText>
+            <YText style={styles.requestErrorText}>{t('Couldn’t load friend requests. Tap to retry.')}</YText>
           </Pressable>
         )}
         {requests.length > 0 && (
           <>
             <View style={styles.sectionGap} />
-            <SectionTitle>Friend requests</SectionTitle>
+            <SectionTitle>{t('Friend requests')}</SectionTitle>
             <View style={styles.list}>
               {requests.map((request) => (
                 <FriendRequestRow
@@ -222,10 +226,10 @@ export default function FriendsScreen() {
         {friendPeople.length > 0 && (
           <>
             <View style={styles.sectionGap} />
-            <SectionTitle>All friends</SectionTitle>
+            <SectionTitle>{t('All friends')}</SectionTitle>
             <View style={styles.list}>
               {friendPeople.map((person) => (
-                <PersonRow key={person.id} person={person} detail={person.online ? 'Online now' : 'Yubrio friend'} />
+                <PersonRow key={person.id} person={person} detail={t(person.online ? 'Online now' : 'Yubrio friend')} />
               ))}
             </View>
           </>
@@ -277,17 +281,18 @@ export default function FriendsScreen() {
 function EmptyFriendInvite({ onPress }: { onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   return (
     <View style={styles.emptyInvitePlain}>
-      <YText style={styles.emptyInviteTitle}>{copy.friends.emptyTitle}</YText>
-      <YText style={styles.emptyInviteCopy}>{copy.friends.emptyCopy}</YText>
+      <YText style={styles.emptyInviteTitle}>{t(copy.friends.emptyTitle)}</YText>
+      <YText style={styles.emptyInviteCopy}>{t(copy.friends.emptyCopy)}</YText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={copy.friends.emptyAction}
+        accessibilityLabel={t(copy.friends.emptyAction)}
         onPress={onPress}
         style={({ pressed }) => [styles.emptyInviteAction, pressed && styles.emptyInvitePressed]}
       >
-        <YText style={styles.emptyInviteActionText}>{copy.friends.emptyAction}</YText>
+        <YText style={styles.emptyInviteActionText}>{t(copy.friends.emptyAction)}</YText>
         <Ionicons name="arrow-forward" size={17} color={colors.brandInk} />
       </Pressable>
     </View>
@@ -305,20 +310,21 @@ function FriendRequestRow({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  if (request.direction === 'outgoing') return <PersonRow person={request.person} detail="Request sent" />;
+  const t = useT();
+  if (request.direction === 'outgoing') return <PersonRow person={request.person} detail={t('Request sent')} />;
   return (
     <View style={styles.requestRow}>
       <View style={styles.requestPerson}>
         <Avatar person={request.person} size={38} />
         <View style={styles.requestCopy}>
           <YText style={styles.requestName}>{request.person.name}</YText>
-          <YText style={styles.requestMeta}>Wants to connect</YText>
+          <YText style={styles.requestMeta}>{t('Wants to connect')}</YText>
         </View>
       </View>
       <View style={styles.requestActions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Accept ${request.person.name}`}
+          accessibilityLabel={t(`Accept ${request.person.name}`)}
           onPress={onAccept}
           style={styles.requestAccept}
         >
@@ -326,7 +332,7 @@ function FriendRequestRow({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Block ${request.person.name}`}
+          accessibilityLabel={t(`Block ${request.person.name}`)}
           onPress={onBlock}
           style={styles.requestBlock}
         >
@@ -356,6 +362,7 @@ function AddFriendModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const ready = !loading && !error && Boolean(handle);
   const appUrl = ready ? Linking.createURL(`/add/${encodeURIComponent(handle)}`) : '';
   const shareUrl = ready ? friendInviteUrl(handle) : '';
@@ -365,12 +372,12 @@ function AddFriendModal({
         <View style={styles.modal}>
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>ADD FRIEND</YText>
-              <YText style={type.section}>Find your people.</YText>
+              <YText style={styles.kicker}>{t('ADD FRIEND')}</YText>
+              <YText style={type.section}>{t('Find your people.')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close"
+              accessibilityLabel={t('Close')}
               onPress={onClose}
               style={styles.modalClose}
             >
@@ -380,16 +387,16 @@ function AddFriendModal({
           {loading ? (
             <View accessible accessibilityRole="progressbar" style={styles.linkState}>
               <ActivityIndicator color={colors.brandText} />
-              <YText style={styles.linkStateTitle}>Preparing your link…</YText>
-              <YText style={styles.linkStateCopy}>Just a second.</YText>
+              <YText style={styles.linkStateTitle}>{t('Preparing your link…')}</YText>
+              <YText style={styles.linkStateCopy}>{t('Just a second.')}</YText>
             </View>
           ) : error ? (
             <View style={styles.linkState}>
               <Ionicons name="cloud-offline-outline" size={26} color={colors.error} />
-              <YText style={styles.linkStateTitle}>Your link couldn’t load.</YText>
-              <YText style={styles.linkStateCopy}>Try again before sharing it.</YText>
+              <YText style={styles.linkStateTitle}>{t('Your link couldn’t load.')}</YText>
+              <YText style={styles.linkStateCopy}>{t('Try again before sharing it.')}</YText>
               <ActionButton
-                label="Try again"
+                label={t('Try again')}
                 icon="refresh"
                 variant="secondary"
                 onPress={onRetry}
@@ -398,7 +405,7 @@ function AddFriendModal({
             </View>
           ) : (
             <>
-              <View accessible accessibilityLabel="Your Yubrio friend QR code" style={styles.qrBox}>
+              <View accessible accessibilityLabel={t('Your Yubrio friend QR code')} style={styles.qrBox}>
                 <QRCode
                   value={appUrl}
                   size={154}
@@ -407,20 +414,20 @@ function AddFriendModal({
                   quietZone={10}
                   ecl="M"
                 />
-                <YText style={styles.qrCode}>SCAN TO ADD {handle.toUpperCase()}</YText>
+                <YText style={styles.qrCode}>{t(`SCAN TO ADD ${handle.toUpperCase()}`)}</YText>
               </View>
-              <YText style={styles.qrHint}>Your link only connects people who choose to add each other.</YText>
+              <YText style={styles.qrHint}>{t('Your link only connects people who choose to add each other.')}</YText>
               <ActionButton
-                label="Scan a friend’s QR"
+                label={t('Scan a friend’s QR')}
                 icon="scan-outline"
                 variant="secondary"
                 onPress={onScan}
                 style={{ marginBottom: 10 }}
               />
               <ActionButton
-                label="Share my friend link"
+                label={t('Share my friend link')}
                 icon="share-outline"
-                onPress={() => Share.share({ message: `Add me on Yubrio: ${shareUrl}` })}
+                onPress={() => Share.share({ message: t(`Add me on Yubrio: ${shareUrl}`) })}
               />
             </>
           )}
@@ -441,6 +448,7 @@ function ScanFriendModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanError, setScanError] = useState(false);
   const close = () => {
@@ -463,12 +471,12 @@ function ScanFriendModal({
           <View style={styles.sheetHandle} />
           <View style={styles.modalTop}>
             <View>
-              <YText style={styles.kicker}>ADD FRIEND</YText>
-              <YText style={type.section}>Scan their code.</YText>
+              <YText style={styles.kicker}>{t('ADD FRIEND')}</YText>
+              <YText style={type.section}>{t('Scan their code.')}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close scanner"
+              accessibilityLabel={t('Close scanner')}
               onPress={close}
               style={styles.modalClose}
             >
@@ -478,18 +486,20 @@ function ScanFriendModal({
           {Platform.OS === 'web' ? (
             <View style={styles.scanFallback}>
               <Ionicons name="phone-portrait-outline" size={28} color={colors.muted} />
-              <YText style={styles.scanFallbackText}>Open Yubrio on your phone to scan a friend’s QR code.</YText>
+              <YText style={styles.scanFallbackText}>
+                {t('Open Yubrio on your phone to scan a friend’s QR code.')}
+              </YText>
             </View>
           ) : !permission ? (
             <View style={styles.scanFallback}>
-              <YText style={styles.scanFallbackText}>Checking camera access…</YText>
+              <YText style={styles.scanFallbackText}>{t('Checking camera access…')}</YText>
             </View>
           ) : !permission.granted ? (
             <View style={styles.scanFallback}>
               <Ionicons name="camera-outline" size={28} color={colors.muted} />
-              <YText style={styles.scanFallbackText}>Yubrio needs camera access to scan friend links.</YText>
+              <YText style={styles.scanFallbackText}>{t('Yubrio needs camera access to scan friend links.')}</YText>
               <ActionButton
-                label="Allow camera"
+                label={t('Allow camera')}
                 icon="camera-outline"
                 onPress={() => void requestPermission()}
                 style={{ marginTop: 14 }}
@@ -506,8 +516,8 @@ function ScanFriendModal({
               <View style={[styles.scanCorners, styles.pointerNone]} />
             </View>
           )}
-          {scanError && <YText style={styles.scanError}>That code isn’t a Yubrio friend link.</YText>}
-          <YText style={styles.scanHint}>Only Yubrio friend links can be scanned here.</YText>
+          {scanError && <YText style={styles.scanError}>{t('That code isn’t a Yubrio friend link.')}</YText>}
+          <YText style={styles.scanHint}>{t('Only Yubrio friend links can be scanned here.')}</YText>
         </View>
       </View>
     </Modal>
@@ -529,6 +539,7 @@ function CreateCircleModal({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [name, setName] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const toggle = (id: string) =>
@@ -555,12 +566,12 @@ function CreateCircleModal({
           >
             <View style={styles.modalTop}>
               <View>
-                <YText style={styles.kicker}>PRIVATE CIRCLE</YText>
-                <YText style={type.section}>Make a circle.</YText>
+                <YText style={styles.kicker}>{t('PRIVATE CIRCLE')}</YText>
+                <YText style={type.section}>{t('Make a circle.')}</YText>
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel={t('Close')}
                 onPress={onClose}
                 style={styles.modalClose}
               >
@@ -568,16 +579,16 @@ function CreateCircleModal({
               </Pressable>
             </View>
             <TextInput
-              accessibilityLabel="Circle name"
+              accessibilityLabel={t('Circle name')}
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
-              placeholder="Circle name"
+              placeholder={t('Circle name')}
               placeholderTextColor={colors.faint}
               style={styles.circleNameInput}
             />
-            <YText style={styles.helper}>Only you see how your circles are organized.</YText>
-            <YText style={styles.selectLabel}>Add people · {selectedIds.length} selected</YText>
+            <YText style={styles.helper}>{t('Only you see how your circles are organized.')}</YText>
+            <YText style={styles.selectLabel}>{t(`Add people · ${selectedIds.length} selected`)}</YText>
             <View style={styles.peoplePicker}>
               {people.slice(0, 8).map((person) => {
                 const selected = selectedIds.includes(person.id);
@@ -602,11 +613,11 @@ function CreateCircleModal({
             </View>
             {error ? (
               <YText accessibilityRole="alert" style={styles.formError}>
-                {error}
+                {t(error)}
               </YText>
             ) : null}
             <ActionButton
-              label="Save circle"
+              label={t('Save circle')}
               icon="checkmark"
               disabled={!name.trim()}
               onPress={() => void save()}

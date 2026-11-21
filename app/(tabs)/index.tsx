@@ -26,6 +26,7 @@ import { spacing, type, Colors } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { useDemo } from '@/stores/demo-store';
 import { copy } from '@/design/copy';
+import { useT } from '@/design/i18n';
 import { getOrCreateAvailabilityConversation, sendAvailabilityMessage } from '@/lib/supabase/repositories';
 import { fetchAvailabilityMessages, findAvailabilityConversation } from '@/lib/supabase/repositories';
 import { useQuery } from '@tanstack/react-query';
@@ -37,6 +38,7 @@ import { formatAvailabilityTime, isAvailabilityUpcoming } from '@/lib/validation
 export default function HomeScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const router = useRouter();
   const {
     me,
@@ -158,11 +160,11 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <YText style={[type.title, styles.greeting]} numberOfLines={1}>
-            {copy.home.greeting} {displayName(me.name)}
+            {t(copy.home.greeting)} {displayName(me.name)}
           </YText>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Your profile and settings"
+            accessibilityLabel={t('Your profile and settings')}
             onPress={() => router.push('/you')}
             style={({ pressed }) => pressed && styles.pressed}
           >
@@ -195,35 +197,35 @@ export default function HomeScreen() {
         {remoteLoading && (
           <View accessibilityRole="progressbar" style={styles.status}>
             <ActivityIndicator size="small" color={colors.brandText} />
-            <YText style={styles.statusText}>Loading your people…</YText>
+            <YText style={styles.statusText}>{t('Loading your people…')}</YText>
           </View>
         )}
         {remoteError && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Retry loading your people"
+            accessibilityLabel={t('Retry loading your people')}
             onPress={retryHome}
             style={styles.errorStatus}
           >
             <Ionicons name="cloud-offline-outline" size={18} color={colors.error} />
-            <YText style={styles.errorStatusText}>Couldn’t load your people. Tap to retry.</YText>
+            <YText style={styles.errorStatusText}>{t('Couldn’t load your people. Tap to retry.')}</YText>
           </Pressable>
         )}
         {actionError ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Dismiss error"
+            accessibilityLabel={t('Dismiss error')}
             onPress={() => setActionError('')}
             style={styles.errorStatus}
           >
             <Ionicons name="warning-outline" size={18} color={colors.error} />
-            <YText style={styles.errorStatusText}>{actionError}</YText>
+            <YText style={styles.errorStatusText}>{t(actionError)}</YText>
           </Pressable>
         ) : null}
 
         <StretchOnScroll {...edges}>
           <View style={styles.section}>
-            <SectionTitle>{copy.home.friendsAvailable}</SectionTitle>
+            <SectionTitle>{t(copy.home.friendsAvailable)}</SectionTitle>
             <FreeFriends
               friends={freeFriends}
               onPress={(friend) =>
@@ -234,7 +236,7 @@ export default function HomeScreen() {
         </StretchOnScroll>
 
         <View style={styles.section}>
-          <SectionTitle>{copy.home.rooms}</SectionTitle>
+          <SectionTitle>{t(copy.home.rooms)}</SectionTitle>
           {rooms.length ? (
             <View style={styles.roomList}>
               {rooms.map((room) => {
@@ -257,10 +259,10 @@ export default function HomeScreen() {
           ) : (
             !remoteLoading && (
               <View style={styles.empty}>
-                <YText style={styles.emptyTitle}>{copy.home.quietTitle}</YText>
-                <YText style={styles.emptyCopy}>{copy.home.quietCopy}</YText>
+                <YText style={styles.emptyTitle}>{t(copy.home.quietTitle)}</YText>
+                <YText style={styles.emptyCopy}>{t(copy.home.quietCopy)}</YText>
                 <ActionButton
-                  label={copy.home.openRoom}
+                  label={t(copy.home.openRoom)}
                   icon="add"
                   onPress={() => router.push('/(tabs)/create')}
                   style={styles.emptyAction}
@@ -331,6 +333,7 @@ function QuickMessageSheet({
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const [localMessages, setLocalMessages] = useState<QuickMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [sendError, setSendError] = useState(false);
@@ -407,36 +410,36 @@ function QuickMessageSheet({
         <View style={styles.messageSheet}>
           <View style={styles.messageHeader}>
             <View>
-              <YText style={styles.kicker}>QUICK NOTE TO</YText>
+              <YText style={styles.kicker}>{t('QUICK NOTE TO')}</YText>
               <YText style={type.section}>{name}</YText>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close message"
+              accessibilityLabel={t('Close message')}
               onPress={onClose}
               style={styles.sheetClose}
             >
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
-          <YText style={styles.messageHint}>This little conversation stays open while {name} is free.</YText>
+          <YText style={styles.messageHint}>{t(`This little conversation stays open while ${name} is free.`)}</YText>
           {sendError && (
             <YText style={{ color: colors.error, fontSize: 13, fontWeight: '700', marginTop: 10 }}>
-              Couldn’t send that. Try again.
+              {t('Couldn’t send that. Try again.')}
             </YText>
           )}
           {messages.length === 0 ? (
             <>
-              <YText style={styles.messagePrompt}>Keep it light.</YText>
+              <YText style={styles.messagePrompt}>{t('Keep it light.')}</YText>
               <View style={styles.quickOptions}>
                 {['Coffee?', 'Wanna game?', 'I’m heading downtown too.'].map((text) => (
                   <Pressable
                     key={text}
                     accessibilityRole="button"
-                    onPress={() => void send(text)}
+                    onPress={() => void send(t(text))}
                     style={styles.quickOption}
                   >
-                    <YText style={styles.quickOptionText}>{text}</YText>
+                    <YText style={styles.quickOptionText}>{t(text)}</YText>
                     <Ionicons name="arrow-up" size={16} color={colors.muted} />
                   </Pressable>
                 ))}
@@ -464,23 +467,23 @@ function QuickMessageSheet({
           )}
           <Pressable accessibilityRole="button" onPress={onSuggest} style={styles.suggestAction}>
             <Ionicons name="sparkles-outline" size={18} color={colors.brandText} />
-            <YText style={styles.suggestActionText}>Open a room with {name}</YText>
+            <YText style={styles.suggestActionText}>{t(`Open a room with ${name}`)}</YText>
             <Ionicons name="arrow-forward" size={16} color={colors.faint} />
           </Pressable>
           <View style={styles.messageComposer}>
             <TextInput
-              accessibilityLabel={`Message ${name}`}
+              accessibilityLabel={t(`Message ${name}`)}
               value={draft}
               onChangeText={setDraft}
               onSubmitEditing={() => void send(draft)}
               returnKeyType="send"
-              placeholder="Say something..."
+              placeholder={t('Say something...')}
               placeholderTextColor={colors.faint}
               style={styles.messageInput}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Send message"
+              accessibilityLabel={t('Send message')}
               disabled={!draft.trim()}
               onPress={() => void send(draft)}
               style={[styles.sendButton, !draft.trim() && styles.disabledAction]}

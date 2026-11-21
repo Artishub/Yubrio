@@ -22,7 +22,9 @@ This file routes work across the product specification. Read the relevant docume
 
 ## Working rules
 
-- Prefer feature-oriented code under `src/`; keep copy centralized.
+- Prefer feature-oriented code under `src/`.
+- The app is German by default with an English switch (You → Language). Write UI text in English in the code and pass it through `t()` from `useT()` (`src/design/i18n.tsx`); add the German to the matching file in `src/design/de/`. `npm test` fails when a `t('…')` text has no German.
+- Run `npm run format` after editing.
 - Treat friendships as reciprocal; never add public stranger discovery or a feed.
 - Use design tokens instead of raw colors, radii, and magic numbers.
 - Keep demo mode usable when Supabase is not configured.

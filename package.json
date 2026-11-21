@@ -13,7 +13,7 @@
     "build:ios:development": "npx eas-cli@latest build --profile development --platform ios",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "test": "tsc --ignoreConfig --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build src/lib/validation/rules.ts && node --test tests/*.test.js",
+    "test": "tsc --ignoreConfig --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build src/lib/validation/rules.ts src/design/de/index.ts && node --test tests/*.test.js",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {

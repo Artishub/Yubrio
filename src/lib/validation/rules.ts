@@ -78,6 +78,16 @@ export function availabilityWindow(from: string, until: string, now = Date.now()
   return { startsAt: start.getTime(), expiresAt: end.getTime() };
 }
 
+// Clock times ("18:30") on the half hour, starting with the first one after `from`.
+export function halfHourSlots(from: number, count: number) {
+  const slot = new Date(from);
+  slot.setMinutes(slot.getMinutes() < 30 ? 30 : 60, 0, 0);
+  return Array.from({ length: count }, (_, index) => {
+    const time = new Date(slot.getTime() + index * 30 * 60 * 1000);
+    return `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
+  });
+}
+
 export function canInviteToRoom(creatorId: string, viewerId: string, participantsCanInvite: boolean) {
   return creatorId === viewerId || participantsCanInvite;
 }

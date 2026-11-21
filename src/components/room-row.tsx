@@ -18,6 +18,7 @@ import { YebBurst } from '@/components/yeb-burst';
 import { Colors, display, radius, spacing, sticker } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
+import { useT } from '@/design/i18n';
 import { Person, Room } from '@/types';
 import { displayTitle } from '@/utils/display-name';
 
@@ -40,6 +41,7 @@ export function RoomRow({
 }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const t = useT();
   const reducedMotion = useReducedMotion();
   const meta = activityMeta[room.activity];
   const title = displayTitle(room.title);
@@ -86,13 +88,13 @@ export function RoomRow({
     <Animated.View entering={reducedMotion ? undefined : FadeInDown.springify()} style={styles.track}>
       <Animated.View accessible={false} style={[styles.reveal, revealStyle]}>
         <Ionicons name="flash" size={18} color={colors.brandInk} />
-        <YText style={styles.revealText}>{copy.room.join}</YText>
+        <YText style={styles.revealText}>{t(copy.room.join)}</YText>
       </Animated.View>
       <GestureDetector gesture={swipe}>
         <Animated.View style={[styles.card, { backgroundColor: meta.color }, cardStyle]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Open ${title}`}
+            accessibilityLabel={t(`Open ${title}`)}
             onPress={() => {
               if (justSwiped.value > 0) return;
               if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -108,17 +110,17 @@ export function RoomRow({
               <View style={styles.line}>
                 {happening && (
                   <View style={styles.nowBadge}>
-                    <YText style={styles.nowText}>{copy.home.roomNow}</YText>
+                    <YText style={styles.nowText}>{t(copy.home.roomNow)}</YText>
                   </View>
                 )}
                 <YText style={styles.time} numberOfLines={1}>
-                  {room.time}
+                  {t(room.time)}
                 </YText>
               </View>
               <View style={styles.line}>
                 <Ionicons name={room.online ? 'globe-outline' : 'location-outline'} size={14} color={colors.onColor} />
                 <YText style={styles.place} numberOfLines={1}>
-                  {room.location ?? (room.online ? 'Online' : 'Undecided')}
+                  {room.location ?? t(room.online ? 'Online' : 'Undecided')}
                 </YText>
               </View>
               <View style={styles.people}>
@@ -127,20 +129,20 @@ export function RoomRow({
                     <Avatar person={person} size={24} />
                   </View>
                 ))}
-                <YText style={styles.count}>{room.count > 0 ? countLabel : copy.home.beFirst}</YText>
+                <YText style={styles.count}>{t(room.count > 0 ? countLabel : copy.home.beFirst)}</YText>
               </View>
             </View>
           </Pressable>
           <View style={styles.action}>
             {room.joined ? (
-              <View accessible accessibilityLabel={copy.room.joined} style={styles.joined}>
+              <View accessible accessibilityLabel={t(copy.room.joined)} style={styles.joined}>
                 <Ionicons name="checkmark" size={16} color={colors.onColor} />
-                <YText style={styles.joinedText}>{copy.home.joinedShort}</YText>
+                <YText style={styles.joinedText}>{t(copy.home.joinedShort)}</YText>
               </View>
             ) : (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Yeb, join ${title}`}
+                accessibilityLabel={t(`Yeb, join ${title}`)}
                 onPress={() => {
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   onYeb();
@@ -148,7 +150,7 @@ export function RoomRow({
                 style={({ pressed }) => [styles.yeb, pressed && styles.yebPressed]}
               >
                 <Ionicons name="flash" size={15} color={colors.brandInk} />
-                <YText style={styles.yebText}>{copy.room.join}</YText>
+                <YText style={styles.yebText}>{t(copy.room.join)}</YText>
               </Pressable>
             )}
             <YebBurst active={Boolean(room.joined)} />

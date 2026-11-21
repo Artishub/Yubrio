@@ -13,17 +13,20 @@ import { AuthScreen } from '@/components/auth-screen';
 import { registerForPushNotificationsAsync } from '@/lib/notifications/register';
 import { persistPushToken } from '@/lib/supabase/repositories';
 import { ThemeProvider, useTheme } from '@/design/theme';
+import { LanguageProvider } from '@/design/i18n';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeProvider>
-            <DemoProvider>
-              <RootNavigator />
-            </DemoProvider>
-          </ThemeProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <DemoProvider>
+                <RootNavigator />
+              </DemoProvider>
+            </ThemeProvider>
+          </LanguageProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

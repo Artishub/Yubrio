@@ -3,55 +3,76 @@ import { Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, 
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ActionButton, ActivityIcon, YText } from '@/components/ui';
-import { ActivityType, radius, spacing, type, Colors, sticker } from '@/design/tokens';
+import { ActivityType, radius, spacing, type, Colors, display, sticker } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
+import { useT } from '@/design/i18n';
 import { Circle, Person, Room } from '@/types';
 import { people as seededPeople } from '@/data/demo';
-import { availabilityWindow, isValidClockTime } from '@/lib/validation/rules';
+import { availabilityWindow, halfHourSlots } from '@/lib/validation/rules';
 
 const activities: ActivityType[] = ['coffee', 'drinks', 'food', 'walk', 'gaming', 'gym', 'hangout', 'custom'];
-const durations = ['1 hour', '3 hours', '6 hours', 'All day', 'Custom'];
+const roomDurations: Record<string, number> = { '1 hour': 1, '2 hours': 2, '3 hours': 3, '6 hours': 6, 'All day': 24 };
+const now = 'Now';
 
 function SheetShell({
   visible,
+  kicker,
+  title,
   children,
   onClose,
   footer,
 }: {
   visible: boolean;
+  kicker: string;
+  title: string;
   children: React.ReactNode;
   onClose: () => void;
-  footer?: React.ReactNode;
+  footer: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={sheetStyles.backdrop}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close sheet"
+          accessibilityLabel={t('Close')}
           onPress={onClose}
           style={StyleSheet.absoluteFill}
         />
         <View style={sheetStyles.sheet}>
           <View style={sheetStyles.handle} />
+          <View style={sheetStyles.sheetHeader}>
+            <View style={sheetStyles.headerCopy}>
+              <YText style={sheetStyles.kicker}>{t(kicker)}</YText>
+              <YText style={type.section}>{t(title)}</YText>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('Close')}
+              onPress={onClose}
+              style={sheetStyles.close}
+            >
+              <Ionicons name="close" size={22} color={colors.ink} />
+            </Pressable>
+          </View>
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[
-              sheetStyles.scrollContent,
-              footer !== undefined && footer !== null ? sheetStyles.footerScrollContent : undefined,
-            ]}
+            contentContainerStyle={sheetStyles.scrollContent}
           >
             {children}
           </ScrollView>
-          {footer ? <View style={sheetStyles.footer}>{footer}</View> : null}
+          <View style={sheetStyles.footer}>{footer}</View>
         </View>
       </View>
     </Modal>
   );
 }
 
+// Everything for a room on one sheet. What and when are always visible and have defaults, so
+// "Open room" works right away; where and who fold out only when someone wants to change them.
 export function CreateRoomSheet({
   visible,
   onClose,
@@ -69,26 +90,26 @@ export function CreateRoomSheet({
   people?: Person[];
   withFriendId?: string;
 }) {
-  const { colors, activityMeta } = useTheme();
+  const { activityMeta } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
-  const [step, setStep] = useState(0);
+  const t = useT();
   const [activity, setActivity] = useState<ActivityType>('drinks');
-  const [when, setWhen] = useState('Now');
-  const [customStart, setCustomStart] = useState('');
+  const [title, setTitle] = useState('');
+  const [start, setStart] = useState(now);
   const [duration, setDuration] = useState('3 hours');
-  const [customDuration, setCustomDuration] = useState('');
+  const [whereOpen, setWhereOpen] = useState(false);
   const [where, setWhere] = useState('In person');
   const [place, setPlace] = useState('');
   const [gameTitle, setGameTitle] = useState('');
   const [gameMode, setGameMode] = useState('');
   const [onlineDetails, setOnlineDetails] = useState('');
+  const [whoOpen, setWhoOpen] = useState(Boolean(withFriendId));
   const [audience, setAudience] = useState(withFriendId ? 'Choose people' : 'All friends');
   const [selectedCircles, setSelectedCircles] = useState<string[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<string[]>(withFriendId ? [withFriendId] : []);
-  const [title, setTitle] = useState('');
   const [chatEnabled, setChatEnabled] = useState(true);
   const [participantsCanInvite, setParticipantsCanInvite] = useState(true);
-  const [formError, setFormError] = useState('');
+  const [slots] = useState(() => halfHourSlots(Date.now(), 47));
   const audienceOptions = useMemo(
     () => ['All friends', ...(circles.length ? ['Choose circles'] : []), 'Choose people'],
     [circles],
@@ -96,22 +117,20 @@ export function CreateRoomSheet({
   const audiencePeople = useMemo(() => people.filter((person) => person.id !== creatorId), [creatorId, people]);
 
   const reset = () => {
-    setStep(0);
     setActivity('drinks');
-    setWhen('Now');
-    setCustomStart('');
+    setTitle('');
+    setStart(now);
     setDuration('3 hours');
-    setCustomDuration('');
+    setWhereOpen(false);
     setWhere('In person');
-    setFormError('');
     setPlace('');
     setGameTitle('');
     setGameMode('');
     setOnlineDetails('');
+    setWhoOpen(false);
     setAudience('All friends');
     setSelectedCircles([]);
     setSelectedPeople([]);
-    setTitle('');
     setChatEnabled(true);
     setParticipantsCanInvite(true);
   };
@@ -119,29 +138,31 @@ export function CreateRoomSheet({
     reset();
     onClose();
   };
-  const next = () => {
-    if (step === 1 && when === 'Custom' && !isValidClockTime(customStart)) {
-      setFormError('Use a time like 18:30.');
-      return;
+  const chooseActivity = (next: ActivityType) => {
+    setActivity(next);
+    // Gaming is usually online, and its game and link fields live under "Where".
+    if (next === 'gaming') {
+      setWhere('Online');
+      setWhereOpen(true);
     }
-    setFormError('');
-    if (step < 3) {
-      setStep((value) => value + 1);
-      return;
-    }
+  };
+  const audienceMissing =
+    (audience === 'Choose people' && selectedPeople.length === 0) ||
+    (audience === 'Choose circles' && selectedCircles.length === 0);
+
+  const create = () => {
     if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const meta = activityMeta[activity];
-    const start = getStartTime(when, customStart);
-    const end = new Date(start.getTime() + durationHours(duration, customDuration) * 60 * 60 * 1000);
+    const startsAt = startTime(start);
+    const endsAt = new Date(startsAt.getTime() + roomDurations[duration] * 60 * 60 * 1000);
     const connectionDetails = [gameTitle.trim(), gameMode.trim(), onlineDetails.trim()].filter(Boolean).join(' · ');
     onCreate({
       id: `room-${Date.now()}`,
       activity,
-      title: title.trim() || (where === 'Online' && gameTitle.trim()) || meta.label,
+      title: title.trim() || (where === 'Online' && gameTitle.trim()) || t(activityMeta[activity].label),
       detail: where === 'Online' ? 'Online · Join after Yeb' : undefined,
-      time: formatRoomTime(start, end),
-      startsAt: start.getTime(),
-      endAt: end.getTime(),
+      time: formatRoomTime(startsAt, endsAt),
+      startsAt: startsAt.getTime(),
+      endAt: endsAt.getTime(),
       people: [],
       count: 1,
       location: where === 'In person' ? place.trim() || 'Decide together' : undefined,
@@ -158,249 +179,132 @@ export function CreateRoomSheet({
     });
     close();
   };
-  const heading =
-    step === 0 ? 'What sounds good?' : step === 1 ? 'When works?' : step === 2 ? 'Where is it?' : 'Who should see it?';
+
+  const whereSummary = where === 'In person' ? place.trim() || t('Decide together') : t(where);
+  const whoSummary =
+    audience === 'Choose people'
+      ? t(`${selectedPeople.length} selected`)
+      : audience === 'Choose circles'
+        ? t(`${selectedCircles.length} selected`)
+        : t(audience);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={close}>
-      <View style={sheetStyles.backdrop}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close room creation"
-          onPress={close}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={sheetStyles.sheet}>
-          <View style={sheetStyles.handle} />
-          <View style={sheetStyles.sheetHeader}>
-            <View style={sheetStyles.headerCopy}>
-              <View style={sheetStyles.stepRow}>
-                {step > 0 && (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Back"
-                    onPress={() => {
-                      setStep((value) => value - 1);
-                      setFormError('');
-                    }}
-                    style={sheetStyles.back}
-                  >
-                    <Ionicons name="arrow-back" size={18} color={colors.ink} />
-                  </Pressable>
-                )}
-                <YText style={sheetStyles.kicker}>OPEN A ROOM · {step + 1}/4</YText>
-              </View>
-              <YText style={type.section}>{heading}</YText>
-            </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={close} style={sheetStyles.close}>
-              <Ionicons name="close" size={22} color={colors.ink} />
-            </Pressable>
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={sheetStyles.creationContent}
+    <SheetShell
+      visible={visible}
+      kicker="OPEN A ROOM"
+      title="What sounds good?"
+      onClose={close}
+      footer={<ActionButton label={t('Open room')} icon="sparkles" disabled={audienceMissing} onPress={create} />}
+    >
+      <View style={sheetStyles.activityGrid}>
+        {activities.map((item) => (
+          <Pressable
+            key={item}
+            accessibilityRole="button"
+            accessibilityState={{ selected: activity === item }}
+            accessibilityLabel={t(activityMeta[item].label)}
+            onPress={() => chooseActivity(item)}
+            style={({ pressed }) => [
+              sheetStyles.activityChoice,
+              activity === item && sheetStyles.activityChoiceSelected,
+              pressed && sheetStyles.choicePressed,
+            ]}
           >
-            {step === 0 && (
-              <>
-                <View style={sheetStyles.activityGrid}>
-                  {activities.map((item) => (
-                    <Pressable
-                      key={item}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: activity === item }}
-                      accessibilityLabel={activityMeta[item].label}
-                      onPress={() => setActivity(item)}
-                      style={({ pressed }) => [
-                        sheetStyles.activityChoice,
-                        activity === item && sheetStyles.activityChoiceSelected,
-                        pressed && sheetStyles.choicePressed,
-                      ]}
-                    >
-                      <ActivityIcon activity={item} size={42} />
-                      <YText style={[sheetStyles.choiceLabel, activity === item && sheetStyles.choiceLabelSelected]}>
-                        {activityMeta[item].label}
-                      </YText>
-                      {activity === item && (
-                        <Ionicons name="checkmark-circle" size={17} color={colors.ink} style={sheetStyles.check} />
-                      )}
-                    </Pressable>
-                  ))}
-                </View>
-                <YTextInput
-                  label="Give it a name (optional)"
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder={activityMeta[activity].label}
-                />
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <ChoiceRow
-                  label="Start"
-                  options={['Now', 'Later today', 'Custom']}
-                  value={when}
-                  onChange={(value) => {
-                    setWhen(value);
-                    setFormError('');
-                  }}
-                />
-                {when === 'Custom' && (
-                  <YTextInput
-                    label="Start time"
-                    value={customStart}
-                    onChangeText={(value) => {
-                      setCustomStart(value);
-                      setFormError('');
-                    }}
-                    placeholder="18:30"
-                    keyboardType="numbers-and-punctuation"
-                  />
-                )}
-                <ChoiceRow label="Duration" options={durations} value={duration} onChange={setDuration} wrap />
-                {duration === 'Custom' && (
-                  <>
-                    <YTextInput
-                      label="How many hours?"
-                      value={customDuration}
-                      onChangeText={(value) => {
-                        setCustomDuration(value);
-                        setFormError('');
-                      }}
-                      placeholder="Up to 24"
-                      keyboardType="decimal-pad"
-                    />
-                    <YText
-                      style={[
-                        sheetStyles.helper,
-                        customDuration.trim() && !validCustomHours(customDuration) && sheetStyles.error,
-                      ]}
-                    >
-                      {customDuration.trim() && !validCustomHours(customDuration)
-                        ? 'Use a number greater than 0 and no more than 24.'
-                        : 'Enter a duration up to 24 hours.'}
-                    </YText>
-                  </>
-                )}
-                <YText style={sheetStyles.helper}>Rooms gently disappear after 24 hours.</YText>
-              </>
-            )}
-            {step === 2 && (
-              <>
-                <ChoiceRow
-                  label="Format"
-                  options={['In person', 'Online', 'Undecided']}
-                  value={where}
-                  onChange={setWhere}
-                  wrap
-                />
-                {where === 'In person' && (
-                  <YTextInput
-                    label="Place (optional)"
-                    value={place}
-                    onChangeText={setPlace}
-                    placeholder="Decide together"
-                  />
-                )}
-                {where === 'Online' && (
-                  <>
-                    {activity === 'gaming' && (
-                      <>
-                        <YTextInput
-                          label="Game (optional)"
-                          value={gameTitle}
-                          onChangeText={setGameTitle}
-                          placeholder="League of Legends"
-                        />
-                        <YTextInput
-                          label="Mode (optional)"
-                          value={gameMode}
-                          onChangeText={setGameMode}
-                          placeholder="ARAM"
-                        />
-                      </>
-                    )}
-                    <YTextInput
-                      label={activity === 'gaming' ? 'Join details (optional)' : 'Link or details (optional)'}
-                      value={onlineDetails}
-                      onChangeText={setOnlineDetails}
-                      placeholder={
-                        activity === 'gaming' ? 'Discord, username, server, or link' : 'Discord, server, or link'
-                      }
-                      multiline
-                    />
-                  </>
-                )}
-                {where === 'Undecided' && (
-                  <YText style={sheetStyles.helper}>You can figure it out together in the room.</YText>
-                )}
-              </>
-            )}
-            {step === 3 && (
-              <>
-                <ChoiceRow label="Audience" options={audienceOptions} value={audience} onChange={setAudience} wrap />
-                {audience === 'Choose circles' && (
-                  <CirclePicker
-                    circles={circles}
-                    selectedIds={selectedCircles}
-                    onToggle={(id) =>
-                      setSelectedCircles((current) =>
-                        current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-                      )
-                    }
-                  />
-                )}
-                {audience === 'Choose people' && (
-                  <PersonPicker
-                    people={audiencePeople}
-                    selectedIds={selectedPeople}
-                    onToggle={(id) =>
-                      setSelectedPeople((current) =>
-                        current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-                      )
-                    }
-                  />
-                )}
-                <OptionRow
-                  icon="chatbubble-ellipses-outline"
-                  title="Room chat"
-                  description="A small place for coordination"
-                  value={chatEnabled}
-                  onChange={setChatEnabled}
-                />
-                <OptionRow
-                  icon="person-add-outline"
-                  title="Participants can invite others"
-                  description="Let people bring a friend"
-                  value={participantsCanInvite}
-                  onChange={setParticipantsCanInvite}
-                />
-              </>
-            )}
-            {formError ? (
-              <YText accessibilityRole="alert" style={sheetStyles.error}>
-                {formError}
-              </YText>
-            ) : null}
-            <ActionButton
-              label={step === 3 ? 'Open room' : 'Continue'}
-              icon={step === 3 ? 'sparkles' : 'arrow-forward'}
-              disabled={
-                (step === 1 && duration === 'Custom' && !validCustomHours(customDuration)) ||
-                (step === 3 &&
-                  ((audience === 'Choose people' && selectedPeople.length === 0) ||
-                    (audience === 'Choose circles' && selectedCircles.length === 0)))
-              }
-              onPress={next}
-              style={{ marginTop: spacing.xl }}
-            />
-          </ScrollView>
-        </View>
+            <ActivityIcon activity={item} size={42} />
+            <YText style={[sheetStyles.choiceLabel, activity === item && sheetStyles.choiceLabelSelected]}>
+              {t(activityMeta[item].label)}
+            </YText>
+          </Pressable>
+        ))}
       </View>
-    </Modal>
+      <YTextInput
+        label="Give it a name (optional)"
+        value={title}
+        onChangeText={setTitle}
+        placeholder={t(activityMeta[activity].label)}
+      />
+      <ChoiceRow label="Start" options={[now, ...slots]} value={start} onChange={setStart} />
+      <ChoiceRow label="Duration" options={Object.keys(roomDurations)} value={duration} onChange={setDuration} />
+
+      <Foldout label="Where" value={whereSummary} open={whereOpen} onToggle={() => setWhereOpen((value) => !value)}>
+        <ChoiceRow
+          label="Format"
+          options={['In person', 'Online', 'Undecided']}
+          value={where}
+          onChange={setWhere}
+          wrap
+        />
+        {where === 'In person' && (
+          <YTextInput
+            label="Place (optional)"
+            value={place}
+            onChangeText={setPlace}
+            placeholder={t('Decide together')}
+          />
+        )}
+        {where === 'Online' && (
+          <>
+            {activity === 'gaming' && (
+              <>
+                <YTextInput
+                  label="Game (optional)"
+                  value={gameTitle}
+                  onChangeText={setGameTitle}
+                  placeholder="League of Legends"
+                />
+                <YTextInput label="Mode (optional)" value={gameMode} onChangeText={setGameMode} placeholder="ARAM" />
+              </>
+            )}
+            <YTextInput
+              label="Link or details (optional)"
+              value={onlineDetails}
+              onChangeText={setOnlineDetails}
+              placeholder={t('Discord, username, server, or link')}
+              multiline
+            />
+          </>
+        )}
+        {where === 'Undecided' && (
+          <YText style={sheetStyles.helper}>{t('You can figure it out together in the room.')}</YText>
+        )}
+      </Foldout>
+
+      <Foldout label="Who sees it" value={whoSummary} open={whoOpen} onToggle={() => setWhoOpen((value) => !value)}>
+        <ChoiceRow label="Audience" options={audienceOptions} value={audience} onChange={setAudience} wrap />
+        {audience === 'Choose circles' && (
+          <CirclePicker
+            circles={circles}
+            selectedIds={selectedCircles}
+            onToggle={(id) => setSelectedCircles((current) => toggled(current, id))}
+          />
+        )}
+        {audience === 'Choose people' && (
+          <PersonPicker
+            people={audiencePeople}
+            selectedIds={selectedPeople}
+            onToggle={(id) => setSelectedPeople((current) => toggled(current, id))}
+          />
+        )}
+        <OptionRow
+          icon="chatbubble-ellipses-outline"
+          title="Room chat"
+          description="A small place for coordination"
+          value={chatEnabled}
+          onChange={setChatEnabled}
+        />
+        <OptionRow
+          icon="person-add-outline"
+          title="Participants can invite others"
+          description="Let people bring a friend"
+          value={participantsCanInvite}
+          onChange={setParticipantsCanInvite}
+        />
+      </Foldout>
+    </SheetShell>
   );
 }
+
+const freeDurations = ['1h', '3h', '6h', 'Today'];
 
 export function AvailabilitySheet({
   visible,
@@ -424,21 +328,22 @@ export function AvailabilitySheet({
   circles?: Circle[];
   excludePersonId?: string;
 }) {
-  const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
-  const [when, setWhen] = useState('Now');
-  const [from, setFrom] = useState('');
+  const t = useT();
+  const [from, setFrom] = useState(now);
   const [until, setUntil] = useState('');
-  const times = when === 'Pick times' ? availabilityWindow(from, until) : null;
   const [duration, setDuration] = useState('3h');
-  const [customDuration, setCustomDuration] = useState('');
   const [audience, setAudience] = useState('Everyone');
   const [selectedCircles, setSelectedCircles] = useState<string[]>([]);
-  const [note, setNote] = useState('Up for anything.');
-  const [allowMessages, setAllowMessages] = useState(true);
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
+  const [note, setNote] = useState('');
+  const [allowMessages, setAllowMessages] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
+  const [slots] = useState(() => halfHourSlots(Date.now(), 47));
+  // "Until" offers the half hours after the chosen start.
+  const untilSlots = useMemo(() => (from === now ? [] : halfHourSlots(clockToday(from).getTime() + 1, 47)), [from]);
+  const times = from === now ? null : availabilityWindow(from, until);
   const audienceOptions = useMemo(
     () => ['Everyone', ...(circles.length ? ['Choose circles'] : []), 'Choose people'],
     [circles],
@@ -447,21 +352,21 @@ export function AvailabilitySheet({
     () => people.filter((person) => person.id !== excludePersonId),
     [excludePersonId, people],
   );
-  const togglePerson = (id: string) =>
-    setSelectedPeople((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
-  const toggleCircle = (id: string) =>
-    setSelectedCircles((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+
+  const chooseFrom = (value: string) => {
+    setFrom(value);
+    // Three hours is the usual length, so preselect it.
+    if (value !== now) setUntil(halfHourSlots(clockToday(value).getTime() + 1, 6)[5]);
+  };
   const reset = () => {
-    setWhen('Now');
-    setFrom('');
+    setFrom(now);
     setUntil('');
     setDuration('3h');
-    setCustomDuration('');
     setAudience('Everyone');
     setSelectedCircles([]);
-    setNote('Up for anything.');
-    setAllowMessages(true);
     setSelectedPeople([]);
+    setNote('');
+    setAllowMessages(true);
     setPublishError('');
   };
   const close = (force = false) => {
@@ -469,117 +374,66 @@ export function AvailabilitySheet({
     reset();
     onClose();
   };
+  const publish = () => {
+    const audienceIds =
+      audience === 'Choose people' ? selectedPeople : audience === 'Choose circles' ? selectedCircles : [];
+    setPublishing(true);
+    setPublishError('');
+    Promise.resolve(onPublish(duration, note.trim(), audience, audienceIds, allowMessages, times))
+      .then(() => close(true))
+      .catch(() => setPublishError('Couldn’t share that right now. Try again.'))
+      .finally(() => setPublishing(false));
+  };
+  const blocked =
+    publishing ||
+    (from !== now && !times) ||
+    (audience === 'Choose people' && selectedPeople.length === 0) ||
+    (audience === 'Choose circles' && selectedCircles.length === 0);
+
   return (
     <SheetShell
       visible={visible}
-      onClose={close}
+      kicker="I’M FREE"
+      title="When are you around?"
+      onClose={() => close()}
       footer={
         <ActionButton
-          label={publishing ? 'Sharing…' : 'Tell friends I’m free'}
+          label={t(publishing ? 'Sharing…' : 'Tell friends I’m free')}
           icon="radio-button-on"
-          disabled={
-            publishing ||
-            (when === 'Pick times' ? !times : duration === 'Custom' && !validCustomHours(customDuration)) ||
-            (audience === 'Choose people' && selectedPeople.length === 0) ||
-            (audience === 'Choose circles' && selectedCircles.length === 0)
-          }
-          onPress={() => {
-            const selectedDuration = duration === 'Custom' ? `${customDuration.trim()}h` : duration;
-            const selectedAudienceIds =
-              audience === 'Choose people' ? selectedPeople : audience === 'Choose circles' ? selectedCircles : [];
-            setPublishing(true);
-            setPublishError('');
-            Promise.resolve(
-              onPublish(selectedDuration, note.trim(), audience, selectedAudienceIds, allowMessages, times),
-            )
-              .then(() => close(true))
-              .catch(() => setPublishError('Couldn’t share that right now. Try again.'))
-              .finally(() => setPublishing(false));
-          }}
+          disabled={blocked}
+          onPress={publish}
         />
       }
     >
-      <View style={sheetStyles.sheetHeader}>
-        <View style={sheetStyles.headerCopy}>
-          <YText style={sheetStyles.kicker}>I’M FREE</YText>
-          <YText style={type.section}>When are you around?</YText>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={() => close()}
-          style={sheetStyles.close}
-        >
-          <Ionicons name="close" size={22} color={colors.ink} />
-        </Pressable>
-      </View>
-      <ChoiceRow label="When" options={['Now', 'Pick times']} value={when} onChange={setWhen} wrap />
-      {when === 'Pick times' && (
+      <ChoiceRow label="From" options={[now, ...slots]} value={from} onChange={chooseFrom} />
+      {from === now ? (
+        <ChoiceRow label="For" options={freeDurations} value={duration} onChange={setDuration} wrap />
+      ) : (
         <>
-          <View style={sheetStyles.timeRow}>
-            <View style={sheetStyles.timeField}>
-              <YTextInput
-                label="From"
-                value={from}
-                onChangeText={setFrom}
-                placeholder="09:00"
-                keyboardType="numbers-and-punctuation"
-              />
-            </View>
-            <View style={sheetStyles.timeField}>
-              <YTextInput
-                label="Until"
-                value={until}
-                onChangeText={setUntil}
-                placeholder="17:00"
-                keyboardType="numbers-and-punctuation"
-              />
-            </View>
-          </View>
-          <YText style={sheetStyles.helper}>Friends see the times now. You show as free once it starts.</YText>
+          <ChoiceRow label="Until" options={untilSlots} value={until} onChange={setUntil} />
+          <YText style={sheetStyles.helper}>{t('Friends see the times now. You show as free once it starts.')}</YText>
         </>
       )}
-      {when === 'Now' && (
-        <ChoiceRow
-          label="Duration"
-          options={['1h', '3h', '6h', 'Today', 'Custom']}
-          value={duration}
-          onChange={setDuration}
-          wrap
+      <YTextInput
+        label="Add a note (optional)"
+        value={note}
+        onChangeText={setNote}
+        placeholder={t('Up for anything.')}
+      />
+      <ChoiceRow label="Who sees it" options={audienceOptions} value={audience} onChange={setAudience} wrap />
+      {audience === 'Choose circles' && (
+        <CirclePicker
+          circles={circles}
+          selectedIds={selectedCircles}
+          onToggle={(id) => setSelectedCircles((current) => toggled(current, id))}
         />
       )}
-      {when === 'Now' && duration === 'Custom' && (
-        <>
-          <YTextInput
-            label="How many hours?"
-            value={customDuration}
-            onChangeText={(value) => {
-              setCustomDuration(value);
-              setPublishError('');
-            }}
-            placeholder="Up to 24"
-            keyboardType="decimal-pad"
-          />
-          <YText
-            style={[
-              sheetStyles.helper,
-              customDuration.trim() && !validCustomHours(customDuration) && sheetStyles.error,
-            ]}
-          >
-            {customDuration.trim() && !validCustomHours(customDuration)
-              ? 'Use a number greater than 0 and no more than 24.'
-              : 'Enter a duration up to 24 hours.'}
-          </YText>
-        </>
-      )}
-      <YTextInput label="Add a note (optional)" value={note} onChangeText={setNote} placeholder="Up for anything." />
-      <YText style={sheetStyles.question}>Who should see this?</YText>
-      <ChoiceRow label="Audience" options={audienceOptions} value={audience} onChange={setAudience} wrap />
-      {audience === 'Choose circles' && (
-        <CirclePicker circles={circles} selectedIds={selectedCircles} onToggle={toggleCircle} />
-      )}
       {audience === 'Choose people' && (
-        <PersonPicker people={audiencePeople} selectedIds={selectedPeople} onToggle={togglePerson} />
+        <PersonPicker
+          people={audiencePeople}
+          selectedIds={selectedPeople}
+          onToggle={(id) => setSelectedPeople((current) => toggled(current, id))}
+        />
       )}
       <OptionRow
         icon="chatbubble-ellipses-outline"
@@ -588,8 +442,45 @@ export function AvailabilitySheet({
         value={allowMessages}
         onChange={setAllowMessages}
       />
-      {publishError ? <YText style={sheetStyles.error}>{publishError}</YText> : null}
+      {publishError ? <YText style={sheetStyles.error}>{t(publishError)}</YText> : null}
     </SheetShell>
+  );
+}
+
+// A row that shows the current choice and opens to change it.
+function Foldout({
+  label,
+  value,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  value: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  const { colors } = useTheme();
+  const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
+  return (
+    <View style={sheetStyles.foldout}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${t(label)}: ${value}`}
+        accessibilityState={{ expanded: open }}
+        onPress={onToggle}
+        style={sheetStyles.foldoutHead}
+      >
+        <YText style={sheetStyles.foldoutLabel}>{t(label)}</YText>
+        <YText style={sheetStyles.foldoutValue} numberOfLines={1}>
+          {value}
+        </YText>
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
+      </Pressable>
+      {open && <View style={sheetStyles.foldoutBody}>{children}</View>}
+    </View>
   );
 }
 
@@ -604,10 +495,11 @@ function PersonPicker({
 }) {
   const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   return (
     <View style={sheetStyles.personPicker}>
       <YText style={sheetStyles.helper}>
-        {selectedIds.length ? `${selectedIds.length} selected` : 'Pick the friends who should see this.'}
+        {t(selectedIds.length ? `${selectedIds.length} selected` : 'Pick the friends who should see this.')}
       </YText>
       {people.length ? (
         people.slice(0, 6).map((person) => {
@@ -630,7 +522,7 @@ function PersonPicker({
           );
         })
       ) : (
-        <YText style={sheetStyles.helper}>Add a friend first, then you can choose them here.</YText>
+        <YText style={sheetStyles.helper}>{t('Add a friend first, then you can choose them here.')}</YText>
       )}
     </View>
   );
@@ -647,10 +539,11 @@ function CirclePicker({
 }) {
   const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   return (
     <View style={sheetStyles.personPicker}>
       <YText style={sheetStyles.helper}>
-        {selectedIds.length ? `${selectedIds.length} selected` : 'Pick one or more circles.'}
+        {t(selectedIds.length ? `${selectedIds.length} selected` : 'Pick one or more circles.')}
       </YText>
       {circles.map((circle) => {
         const selected = selectedIds.includes(circle.id);
@@ -658,7 +551,7 @@ function CirclePicker({
           <Pressable
             key={circle.id}
             accessibilityRole="checkbox"
-            accessibilityLabel={`Circle ${circle.name}`}
+            accessibilityLabel={`${t('Circle')} ${circle.name}`}
             accessibilityState={{ checked: selected }}
             onPress={() => onToggle(circle.id)}
             style={sheetStyles.circleChoice}
@@ -669,7 +562,7 @@ function CirclePicker({
             <View style={sheetStyles.circleChoiceCopy}>
               <YText style={sheetStyles.circleChoiceName}>{circle.name}</YText>
               <YText style={sheetStyles.circleChoiceCount}>
-                {circle.memberIds.length} {circle.memberIds.length === 1 ? 'friend' : 'friends'}
+                {t(`${circle.memberIds.length} ${circle.memberIds.length === 1 ? 'friend' : 'friends'}`)}
               </YText>
             </View>
             <Ionicons
@@ -699,11 +592,12 @@ function OptionRow({
 }) {
   const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   return (
     <Pressable
       accessibilityRole="switch"
-      accessibilityLabel={title}
-      accessibilityHint={description}
+      accessibilityLabel={t(title)}
+      accessibilityHint={t(description)}
       accessibilityState={{ checked: value }}
       onPress={() => onChange(!value)}
       style={sheetStyles.optionLine}
@@ -712,8 +606,8 @@ function OptionRow({
         <Ionicons name={icon} size={18} color={colors.ink} />
       </View>
       <View style={sheetStyles.optionCopy}>
-        <YText style={sheetStyles.optionTitle}>{title}</YText>
-        <YText style={sheetStyles.helper}>{description}</YText>
+        <YText style={sheetStyles.optionTitle}>{t(title)}</YText>
+        <YText style={sheetStyles.helper}>{t(description)}</YText>
       </View>
       <Switch
         accessible={false}
@@ -730,12 +624,13 @@ function OptionRow({
 function YTextInput({ label, ...props }: { label: string } & React.ComponentProps<typeof TextInput>) {
   const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   return (
     <View style={sheetStyles.inputWrap}>
-      <YText style={sheetStyles.inputLabel}>{label}</YText>
+      <YText style={sheetStyles.inputLabel}>{t(label)}</YText>
       <TextInput
         {...props}
-        accessibilityLabel={props.accessibilityLabel ?? label}
+        accessibilityLabel={props.accessibilityLabel ?? t(label)}
         style={[sheetStyles.input, props.multiline && sheetStyles.multilineInput]}
         placeholderTextColor={colors.faint}
       />
@@ -758,11 +653,12 @@ function ChoiceRow({
 }) {
   const { colors } = useTheme();
   const sheetStyles = useThemedStyles(makeSheetStyles);
+  const t = useT();
   const choices = options.map((item) => (
     <Pressable
       key={item}
       accessibilityRole="radio"
-      accessibilityLabel={`${label}: ${item}`}
+      accessibilityLabel={`${t(label)}: ${t(item)}`}
       accessibilityState={{ selected: value === item }}
       onPress={() => onChange(item)}
       style={({ pressed }) => [
@@ -771,12 +667,12 @@ function ChoiceRow({
         pressed && sheetStyles.choicePressed,
       ]}
     >
-      <YText style={[sheetStyles.choiceChipText, value === item && { color: colors.brandInk }]}>{item}</YText>
+      <YText style={[sheetStyles.choiceChipText, value === item && { color: colors.brandInk }]}>{t(item)}</YText>
     </Pressable>
   ));
   return (
     <View style={sheetStyles.choiceRow}>
-      <YText style={sheetStyles.inputLabel}>{label}</YText>
+      <YText style={sheetStyles.inputLabel}>{t(label)}</YText>
       {wrap ? (
         <View style={sheetStyles.choiceListWrap}>{choices}</View>
       ) : (
@@ -788,33 +684,24 @@ function ChoiceRow({
   );
 }
 
-function durationHours(value: string, custom = '') {
-  if (value === 'Custom') return validCustomHours(custom) ? Number(custom) : 3;
-  return value === '1 hour' ? 1 : value === '6 hours' ? 6 : value === 'All day' ? 24 : 3;
+function toggled(ids: string[], id: string) {
+  return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
-function validCustomHours(value: string) {
-  const hours = Number(value.trim());
-  return Number.isFinite(hours) && hours > 0 && hours <= 24;
+
+// "HH:MM" as a time today.
+function clockToday(clock: string) {
+  const [hour, minute] = clock.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date;
 }
-function getStartTime(value: string, custom: string) {
-  const now = new Date();
-  if (value === 'Now') return now;
-  if (value === 'Custom') {
-    const match = /^(\d{1,2}):(\d{2})$/.exec(custom.trim());
-    if (match) {
-      const hour = Number(match[1]);
-      const minute = Number(match[2]);
-      if (hour < 24 && minute < 60) {
-        const start = new Date();
-        start.setHours(hour, minute, 0, 0);
-        if (start.getTime() < now.getTime()) start.setDate(start.getDate() + 1);
-        return start;
-      }
-    }
-  }
-  const later = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-  later.setMinutes(Math.ceil(later.getMinutes() / 30) * 30, 0, 0);
-  return later;
+
+// The chosen start: now, or the next time the clock shows that slot.
+function startTime(start: string) {
+  if (start === now) return new Date();
+  const date = clockToday(start);
+  if (date.getTime() < Date.now()) date.setDate(date.getDate() + 1);
+  return date;
 }
 function formatTime(date: Date) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -827,10 +714,10 @@ function formatRoomTime(start: Date, end: Date) {
     : `${startDay} ${formatTime(start)}–${endDay} ${formatTime(end)}`;
 }
 function formatDay(date: Date) {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const daysAway = Math.round((target.getTime() - today.getTime()) / 86400000);
+  const daysAway = Math.round((target.getTime() - startOfToday.getTime()) / 86400000);
   if (daysAway === 0) return 'Today';
   if (daysAway === 1) return 'Tomorrow';
   return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
@@ -851,7 +738,23 @@ const makeSheetStyles = (colors: Colors) =>
       minHeight: 440,
       maxHeight: '96%',
     },
-    scrollContent: { paddingBottom: 6 },
+    scrollContent: { paddingBottom: spacing.md },
+    foldout: {
+      marginTop: spacing.lg,
+      borderRadius: radius.card,
+      backgroundColor: colors.surface,
+      ...sticker(colors, 3),
+    },
+    foldoutHead: {
+      minHeight: 52,
+      paddingHorizontal: spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    foldoutLabel: { ...display, fontSize: 16 },
+    foldoutValue: { flex: 1, textAlign: 'right', fontSize: 14, fontWeight: '600', color: colors.muted },
+    foldoutBody: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
     footerScrollContent: { paddingBottom: spacing.md },
     creationContent: { paddingBottom: 6 },
     footer: { paddingTop: spacing.md },
