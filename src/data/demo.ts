@@ -21,15 +21,78 @@ export const circles: Circle[] = [
 ];
 
 export const rooms: Room[] = [
-  { id: 'drinks', activity: 'drinks', title: 'Drinks after work', time: 'Today · 17:00–22:00', startsAt: demoNow - 1000 * 60 * 60, endAt: demoNow + 1000 * 60 * 60 * 3, people: ['max', 'lisa'], count: 2, location: 'Ludwigstraße · Gießen', creatorId: 'max', chatEnabled: true, participantsCanInvite: true },
-  { id: 'league', activity: 'gaming', title: 'League tonight', detail: 'ARAM · Discord', time: 'Today · 20:00–23:00', startsAt: demoNow + 1000 * 60 * 60, endAt: demoNow + 1000 * 60 * 60 * 6, people: ['jonas'], count: 1, online: 'League of Legends · ARAM · discord.gg/yubrio-demo', creatorId: 'jonas', chatEnabled: true, participantsCanInvite: true },
-  { id: 'coffee', activity: 'coffee', title: 'Coffee?', detail: 'Starting soon', time: 'Today · 15:30–17:00', startsAt: demoNow - 1000 * 60 * 15, endAt: demoNow + 1000 * 60 * 60, people: ['sarah'], count: 1, location: 'Near the station', creatorId: 'sarah', chatEnabled: true, participantsCanInvite: true },
+  {
+    id: 'drinks',
+    activity: 'drinks',
+    title: 'Drinks after work',
+    time: 'Today · 17:00–22:00',
+    startsAt: demoNow - 1000 * 60 * 60,
+    endAt: demoNow + 1000 * 60 * 60 * 3,
+    people: ['max', 'lisa'],
+    count: 2,
+    location: 'Ludwigstraße · Gießen',
+    creatorId: 'max',
+    chatEnabled: true,
+    participantsCanInvite: true,
+  },
+  {
+    id: 'league',
+    activity: 'gaming',
+    title: 'League tonight',
+    detail: 'ARAM · Discord',
+    time: 'Today · 20:00–23:00',
+    startsAt: demoNow + 1000 * 60 * 60,
+    endAt: demoNow + 1000 * 60 * 60 * 6,
+    people: ['jonas'],
+    count: 1,
+    online: 'League of Legends · ARAM · discord.gg/yubrio-demo',
+    creatorId: 'jonas',
+    chatEnabled: true,
+    participantsCanInvite: true,
+  },
+  {
+    id: 'coffee',
+    activity: 'coffee',
+    title: 'Coffee?',
+    detail: 'Starting soon',
+    time: 'Today · 15:30–17:00',
+    startsAt: demoNow - 1000 * 60 * 15,
+    endAt: demoNow + 1000 * 60 * 60,
+    people: ['sarah'],
+    count: 1,
+    location: 'Near the station',
+    creatorId: 'sarah',
+    chatEnabled: true,
+    participantsCanInvite: true,
+  },
 ];
 
 export const availability: Availability[] = [
-  { id: 'sarah-free', personId: 'sarah', expiresIn: '2h left', expiresAt: Date.now() + 2 * 60 * 60 * 1000, note: 'Up for anything.', canMessage: true },
-  { id: 'max-free', personId: 'max', expiresIn: 'later', startsAt: nextFullHour + 60 * 60 * 1000, expiresAt: nextFullHour + 5 * 60 * 60 * 1000, note: 'Gaming after dinner.', canMessage: true },
-  { id: 'alex-free', personId: 'alex', expiresIn: 'until tonight', expiresAt: Date.now() + 7 * 60 * 60 * 1000, note: 'Maybe coffee or gaming.', canMessage: true },
+  {
+    id: 'sarah-free',
+    personId: 'sarah',
+    expiresIn: '2h left',
+    expiresAt: Date.now() + 2 * 60 * 60 * 1000,
+    note: 'Up for anything.',
+    canMessage: true,
+  },
+  {
+    id: 'max-free',
+    personId: 'max',
+    expiresIn: 'later',
+    startsAt: nextFullHour + 60 * 60 * 1000,
+    expiresAt: nextFullHour + 5 * 60 * 60 * 1000,
+    note: 'Gaming after dinner.',
+    canMessage: true,
+  },
+  {
+    id: 'alex-free',
+    personId: 'alex',
+    expiresIn: 'until tonight',
+    expiresAt: Date.now() + 7 * 60 * 60 * 1000,
+    note: 'Maybe coffee or gaming.',
+    canMessage: true,
+  },
 ];
 
 // In demo mode a friend reacts after this delay, so the flows can be felt without a backend.
@@ -37,11 +100,26 @@ export const demoReplyDelayMs = 3500;
 export const demoQuickReply = 'Yeb! Give me ten minutes.';
 
 export const roomMessages: Record<string, { author: string; body: string }[]> = {
-  drinks: [{ author: 'Lisa', body: 'I can get there around 18:00.' }, { author: 'Max', body: 'I’ll grab a table.' }],
-  league: [{ author: 'Jonas', body: 'Plans looking good.' }, { author: 'Lisa', body: 'I can make it around 17:30.' }],
+  drinks: [
+    { author: 'Lisa', body: 'I can get there around 18:00.' },
+    { author: 'Max', body: 'I’ll grab a table.' },
+  ],
+  league: [
+    { author: 'Jonas', body: 'Plans looking good.' },
+    { author: 'Lisa', body: 'I can make it around 17:30.' },
+  ],
   coffee: [{ author: 'Sarah', body: 'Near the station works.' }],
 };
 
 export const roomSuggestions: Record<string, RoomSuggestion[]> = {
-  drinks: [{ id: 'suggestion-drinks-food', roomId: 'drinks', activity: 'food', title: 'Grab something to eat too', authorId: 'lisa', authorName: 'Lisa' }],
+  drinks: [
+    {
+      id: 'suggestion-drinks-food',
+      roomId: 'drinks',
+      activity: 'food',
+      title: 'Grab something to eat too',
+      authorId: 'lisa',
+      authorName: 'Lisa',
+    },
+  ],
 };

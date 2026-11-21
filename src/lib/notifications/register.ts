@@ -22,9 +22,18 @@ export async function registerForPushNotificationsAsync(options: { requestPermis
   const projectId = easProjectId();
   if (!projectId) return null;
   const notifications = await import('expo-notifications');
-  if (Platform.OS === 'android') await notifications.setNotificationChannelAsync('default', { name: 'Yubrio', importance: notifications.AndroidImportance.DEFAULT, vibrationPattern: [0, 180], lightColor: '#D9F96B' });
+  if (Platform.OS === 'android')
+    await notifications.setNotificationChannelAsync('default', {
+      name: 'Yubrio',
+      importance: notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 180],
+      lightColor: '#D9F96B',
+    });
   const current = await notifications.getPermissionsAsync();
-  const permissions = current.status === 'granted' || options.requestPermission === false ? current : await notifications.requestPermissionsAsync();
+  const permissions =
+    current.status === 'granted' || options.requestPermission === false
+      ? current
+      : await notifications.requestPermissionsAsync();
   if (permissions.status !== 'granted') return null;
   const token = await notifications.getExpoPushTokenAsync({ projectId });
   return token.data;

@@ -33,7 +33,12 @@ export function audienceIncludes({ audience, viewerId, circleMemberIds = [], sel
   return selectedProfileIds.includes(viewerId);
 }
 
-export function canMessageAvailability({ expiresAt, allowMessages, now = Date.now(), gracePeriodHours = 2 }: AvailabilityMessageRule) {
+export function canMessageAvailability({
+  expiresAt,
+  allowMessages,
+  now = Date.now(),
+  gracePeriodHours = 2,
+}: AvailabilityMessageRule) {
   return allowMessages && expiresAt + gracePeriodHours * 60 * 60 * 1000 > now;
 }
 
@@ -66,7 +71,10 @@ export function availabilityWindow(from: string, until: string, now = Date.now()
   const start = atClockTime(from, now);
   const end = atClockTime(until, now);
   if (end <= start) end.setDate(end.getDate() + 1);
-  if (end.getTime() <= now) { start.setDate(start.getDate() + 1); end.setDate(end.getDate() + 1); }
+  if (end.getTime() <= now) {
+    start.setDate(start.getDate() + 1);
+    end.setDate(end.getDate() + 1);
+  }
   return { startsAt: start.getTime(), expiresAt: end.getTime() };
 }
 
@@ -74,7 +82,12 @@ export function canInviteToRoom(creatorId: string, viewerId: string, participant
   return creatorId === viewerId || participantsCanInvite;
 }
 
-export function filterInvitableFriendIds(friendIds: string[], viewerId: string, memberIds: string[] = [], invitedIds: string[] = []) {
+export function filterInvitableFriendIds(
+  friendIds: string[],
+  viewerId: string,
+  memberIds: string[] = [],
+  invitedIds: string[] = [],
+) {
   const excluded = new Set([viewerId, ...memberIds, ...invitedIds]);
   return [...new Set(friendIds)].filter((friendId) => !excluded.has(friendId));
 }

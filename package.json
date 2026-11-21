@@ -13,7 +13,8 @@
     "build:ios:development": "npx eas-cli@latest build --profile development --platform ios",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "test": "tsc --ignoreConfig --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build src/lib/validation/rules.ts && node --test tests/*.test.js"
+    "test": "tsc --ignoreConfig --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build src/lib/validation/rules.ts && node --test tests/*.test.js",
+    "format": "prettier --write \"app/**/*.{ts,tsx}\" \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@expo-google-fonts/fredoka": "^0.4.1",
@@ -59,6 +60,7 @@
     "@types/react": "~19.2.4",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~57.0.2",
+    "prettier": "^3.10.1",
     "typescript": "~6.0.3"
   }
 }

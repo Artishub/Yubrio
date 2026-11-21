@@ -113,9 +113,19 @@ export const motion = {
 };
 // The edge of every card and button. Dark mode: a solid outline and a hard shadow offset
 // down-right. Glass mode: a light rim, a soft drop shadow and (on web) a blur of what is behind.
-export const sticker = (colors: Colors, offset = 4) => colors.material === 'glass'
-  ? { borderWidth: 1, borderColor: colors.outline, boxShadow: `0px ${offset * 2}px ${offset * 6}px ${colors.shadow}`, backdropFilter: 'blur(18px) saturate(160%)' }
-  : { borderWidth: 1.5, borderColor: colors.outline, boxShadow: `${offset - 1}px ${offset - 1}px 0px ${colors.outline}` };
+export const sticker = (colors: Colors, offset = 4) =>
+  colors.material === 'glass'
+    ? {
+        borderWidth: 1,
+        borderColor: colors.outline,
+        boxShadow: `0px ${offset * 2}px ${offset * 6}px ${colors.shadow}`,
+        backdropFilter: 'blur(18px) saturate(160%)',
+      }
+    : {
+        borderWidth: 1.5,
+        borderColor: colors.outline,
+        boxShadow: `${offset - 1}px ${offset - 1}px 0px ${colors.outline}`,
+      };
 export const shadowCard = (colors: Colors) => ({ boxShadow: sticker(colors).boxShadow, elevation: 0 });
 // Round display face for titles and buttons; the file is already bold, so no extra weight.
 export const display = { fontFamily: 'Fredoka_700Bold', fontWeight: 'normal' as const };
@@ -144,8 +154,17 @@ export const activityTypes = Object.keys(activityInfo) as ActivityType[];
 export const isActivityType = (value: string): value is ActivityType => value in activityInfo;
 
 export function activityMetaFor(colors: Colors) {
-  const entries = activityTypes.map((activity) => [activity, { ...activityInfo[activity], color: colors[activity], tint: colors[`${activity}Tint` as const] }] as const);
-  return Object.fromEntries(entries) as Record<ActivityType, { label: string; icon: string; emoji: string; color: string; tint: string }>;
+  const entries = activityTypes.map(
+    (activity) =>
+      [
+        activity,
+        { ...activityInfo[activity], color: colors[activity], tint: colors[`${activity}Tint` as const] },
+      ] as const,
+  );
+  return Object.fromEntries(entries) as Record<
+    ActivityType,
+    { label: string; icon: string; emoji: string; color: string; tint: string }
+  >;
 }
 
 export const activityLabel = (activity: ActivityType) => activityInfo[activity].label;

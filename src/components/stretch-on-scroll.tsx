@@ -1,17 +1,37 @@
 import React from 'react';
-import Animated, { SharedValue, measure, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useReducedMotion, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  SharedValue,
+  measure,
+  useAnimatedRef,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { motion } from '@/design/tokens';
 
 export function useStretchScroll() {
   const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler((event) => { scrollY.value = event.contentOffset.y; });
+  const onScroll = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
   return { scrollY, onScroll };
 }
 
 // Follows the finger: while a block crosses the top or bottom edge of the list it stretches in
 // the scroll direction, blurs, dims and fades, like a smear. `top` and `bottom` are the screen
 // positions of those edges.
-export function StretchOnScroll({ scrollY, top, bottom, children }: { scrollY: SharedValue<number>; top: number; bottom: number; children: React.ReactNode }) {
+export function StretchOnScroll({
+  scrollY,
+  top,
+  bottom,
+  children,
+}: {
+  scrollY: SharedValue<number>;
+  top: number;
+  bottom: number;
+  children: React.ReactNode;
+}) {
   const ref = useAnimatedRef<Animated.View>();
   const reducedMotion = useReducedMotion();
 
@@ -35,5 +55,9 @@ export function StretchOnScroll({ scrollY, top, bottom, children }: { scrollY: S
   });
 
   // The outer view is measured, so the stretch itself never feeds back into the measurement.
-  return <Animated.View ref={ref}><Animated.View style={style}>{children}</Animated.View></Animated.View>;
+  return (
+    <Animated.View ref={ref}>
+      <Animated.View style={style}>{children}</Animated.View>
+    </Animated.View>
+  );
 }
