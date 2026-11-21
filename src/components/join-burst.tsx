@@ -20,7 +20,7 @@ const sparks = Array.from({ length: 12 }, (_, index) => ({
 }));
 
 // Plays once each time `active` turns true (and on mount when `playOnMount` is set).
-export function YebBurst({ active, playOnMount = false }: { active: boolean; playOnMount?: boolean }) {
+export function JoinBurst({ active, playOnMount = false }: { active: boolean; playOnMount?: boolean }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const reducedMotion = useReducedMotion();

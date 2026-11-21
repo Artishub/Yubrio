@@ -1,10 +1,10 @@
 import { Platform } from 'react-native';
 
 export const links = {
-  scheme: 'yubrio',
-  domains: ['yubrio.com', 'yubr.io'],
-  authCallback: process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL ?? 'yubrio://auth/callback',
-  publicBaseUrl: process.env.EXPO_PUBLIC_PUBLIC_URL ?? 'https://yubrio.com',
+  scheme: 'roomhop',
+  domains: ['roomhop.com', 'roomhop.app'],
+  authCallback: process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL ?? 'roomhop://auth/callback',
+  publicBaseUrl: process.env.EXPO_PUBLIC_PUBLIC_URL ?? 'https://roomhop.com',
 };
 
 export function authCallbackUrl() {

@@ -21,7 +21,7 @@ export const shared: German = {
     Back: 'Zurück',
     'Go back': 'Zurück',
     'Try again': 'Nochmal versuchen',
-    'Yeb!': 'Yeb!',
+    'I’m in!': 'Dabei!',
   },
   patterns: [
     [/^(\d+)h left$/, 'noch $1 Std.'],

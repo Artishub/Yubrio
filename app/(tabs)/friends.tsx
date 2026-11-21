@@ -136,7 +136,7 @@ export default function FriendsScreen() {
               ))}
             </View>
             <View style={styles.summaryCopy}>
-              <YText style={styles.summaryTitle}>{t(friendPeople.length + ' friends on Yubrio')}</YText>
+              <YText style={styles.summaryTitle}>{t(friendPeople.length + ' friends on Roomhop')}</YText>
               <YText style={styles.summaryDescription}>{t('The good kind of close circle.')}</YText>
             </View>
             <Ionicons name="sparkles-outline" size={20} color={colors.brandText} />
@@ -229,7 +229,11 @@ export default function FriendsScreen() {
             <SectionTitle>{t('All friends')}</SectionTitle>
             <View style={styles.list}>
               {friendPeople.map((person) => (
-                <PersonRow key={person.id} person={person} detail={t(person.online ? 'Online now' : 'Yubrio friend')} />
+                <PersonRow
+                  key={person.id}
+                  person={person}
+                  detail={t(person.online ? 'Online now' : 'Roomhop friend')}
+                />
               ))}
             </View>
           </>
@@ -405,7 +409,7 @@ function AddFriendModal({
             </View>
           ) : (
             <>
-              <View accessible accessibilityLabel={t('Your Yubrio friend QR code')} style={styles.qrBox}>
+              <View accessible accessibilityLabel={t('Your Roomhop friend QR code')} style={styles.qrBox}>
                 <QRCode
                   value={appUrl}
                   size={154}
@@ -427,7 +431,7 @@ function AddFriendModal({
               <ActionButton
                 label={t('Share my friend link')}
                 icon="share-outline"
-                onPress={() => Share.share({ message: t(`Add me on Yubrio: ${shareUrl}`) })}
+                onPress={() => Share.share({ message: t(`Add me on Roomhop: ${shareUrl}`) })}
               />
             </>
           )}
@@ -487,7 +491,7 @@ function ScanFriendModal({
             <View style={styles.scanFallback}>
               <Ionicons name="phone-portrait-outline" size={28} color={colors.muted} />
               <YText style={styles.scanFallbackText}>
-                {t('Open Yubrio on your phone to scan a friend’s QR code.')}
+                {t('Open Roomhop on your phone to scan a friend’s QR code.')}
               </YText>
             </View>
           ) : !permission ? (
@@ -497,7 +501,7 @@ function ScanFriendModal({
           ) : !permission.granted ? (
             <View style={styles.scanFallback}>
               <Ionicons name="camera-outline" size={28} color={colors.muted} />
-              <YText style={styles.scanFallbackText}>{t('Yubrio needs camera access to scan friend links.')}</YText>
+              <YText style={styles.scanFallbackText}>{t('Roomhop needs camera access to scan friend links.')}</YText>
               <ActionButton
                 label={t('Allow camera')}
                 icon="camera-outline"
@@ -516,8 +520,8 @@ function ScanFriendModal({
               <View style={[styles.scanCorners, styles.pointerNone]} />
             </View>
           )}
-          {scanError && <YText style={styles.scanError}>{t('That code isn’t a Yubrio friend link.')}</YText>}
-          <YText style={styles.scanHint}>{t('Only Yubrio friend links can be scanned here.')}</YText>
+          {scanError && <YText style={styles.scanError}>{t('That code isn’t a Roomhop friend link.')}</YText>}
+          <YText style={styles.scanHint}>{t('Only Roomhop friend links can be scanned here.')}</YText>
         </View>
       </View>
     </Modal>

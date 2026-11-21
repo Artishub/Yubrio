@@ -159,7 +159,7 @@ export function CreateRoomSheet({
       id: `room-${Date.now()}`,
       activity,
       title: title.trim() || (where === 'Online' && gameTitle.trim()) || t(activityMeta[activity].label),
-      detail: where === 'Online' ? 'Online · Join after Yeb' : undefined,
+      detail: where === 'Online' ? 'Online · Link after you join' : undefined,
       time: formatRoomTime(startsAt, endsAt),
       startsAt: startsAt.getTime(),
       endAt: endsAt.getTime(),

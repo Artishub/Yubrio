@@ -6,11 +6,11 @@
 - Zod for input and API validation.
 - Reanimated + Gesture Handler for motion/gestures; Expo Haptics for tactile feedback; Expo Notifications for push; Expo GlassEffect/Blur where appropriate. Native Liquid Glass is capability-gated to iOS 26+ and falls back safely elsewhere.
 - EAS Build and EAS Update; prefer physical iPhone testing with development builds and cloud native builds on an 8 GB M1 Mac.
-- `expo-camera` is used only for scanning Yubrio friend QR links; camera access is requested at the scanner, not at app launch.
+- `expo-camera` is used only for scanning Roomhop friend QR links; camera access is requested at the scanner, not at app launch.
 
 ## Structure
 
-`app/` routes; `src/components/` primitives and Yubrio UI; `src/features/` home, rooms, availability, friends, messaging; `src/design/` tokens/typography/motion; `src/lib/` Supabase/query/validation; `src/stores/`; `src/types/`; `src/utils/`.
+`app/` routes; `src/components/` primitives and Roomhop UI; `src/features/` home, rooms, availability, friends, messaging; `src/design/` tokens/typography/motion; `src/lib/` Supabase/query/validation; `src/stores/`; `src/types/`; `src/utils/`.
 
 ## Runtime modes
 

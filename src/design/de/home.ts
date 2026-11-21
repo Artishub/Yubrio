@@ -53,7 +53,7 @@ export const home: German = {
     'Send message': 'Nachricht senden',
 
     // Room and friend cards
-    'Yeb, join room': 'Yeb, Raum beitreten',
+    'Join room': 'Raum beitreten',
     'Open to your people': 'Offen für deine Leute',
     '1 person is in': '1 Person ist dabei',
     'HAPPENING SOON': 'GLEICH',
@@ -117,7 +117,7 @@ export const home: German = {
     'Sign in to receive alerts': 'Melde dich an, um Mitteilungen zu bekommen',
     'Push alerts are on': 'Push-Mitteilungen sind an',
     'Notifications are off': 'Benachrichtigungen sind aus',
-    'Install the Yubrio development build first': 'Installiere zuerst den Yubrio Development Build',
+    'Install the Roomhop development build first': 'Installiere zuerst den Roomhop Development Build',
     'Use a physical phone to enable': 'Nur auf einem echten Handy möglich',
     'Get a nudge when plans move': 'Bekomm Bescheid, wenn sich etwas tut',
     'Push alerts enabled': 'Push-Mitteilungen aktiviert',
@@ -126,8 +126,8 @@ export const home: German = {
     'Enabling…': 'Wird aktiviert…',
     'Notifications are off. Allow them in iPhone Settings, then try again.':
       'Benachrichtigungen sind aus. Erlaube sie in den iPhone-Einstellungen und versuch es nochmal.',
-    'Install the Yubrio development build on your iPhone first.':
-      'Installiere zuerst den Yubrio Development Build auf deinem iPhone.',
+    'Install the Roomhop development build on your iPhone first.':
+      'Installiere zuerst den Roomhop Development Build auf deinem iPhone.',
     'Push alerts are only available on a physical phone.': 'Push-Mitteilungen gibt es nur auf einem echten Handy.',
     'Couldn’t enable push alerts. Try again.': 'Push-Mitteilungen konnten nicht aktiviert werden. Versuch es nochmal.',
     'Friends become free': 'Freunde werden frei',
@@ -147,7 +147,7 @@ export const home: German = {
     ],
     [/^Open a room with (.+)$/, 'Raum mit $1 öffnen'],
     [/^Message (.+)$/, 'Nachricht an $1'],
-    [/^Yeb, join (.+)$/, 'Yeb, bei $1 mitmachen'],
+    [/^Join (.+)$/, 'Bei $1 mitmachen'],
     [/^Open (.+)$/, '$1 öffnen'],
   ],
 };

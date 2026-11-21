@@ -1,4 +1,4 @@
-# Yubrio workspace guide
+# Roomhop workspace guide
 
 This file routes work across the product specification. Read the relevant document before changing that area; keep the MVP small, calm, and friend-centered.
 

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Scheme, activityMetaFor, palettes } from '@/design/tokens';
 
-const themeModeKey = 'yubrio.theme-mode';
+const themeModeKey = 'roomhop.theme-mode';
 
 type ThemeValue = {
   colors: Colors;

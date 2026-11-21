@@ -8,15 +8,15 @@ adaptive
 
 ## Users
 
-Primary users are people who already know one another and want to spend more time together spontaneously. They open Yubrio when they may be free, are looking for a low-pressure plan, or want to see which friends are available now.
+Primary users are people who already know one another and want to spend more time together spontaneously. They open Roomhop when they may be free, are looking for a low-pressure plan, or want to see which friends are available now.
 
 ## Product Purpose
 
-Yubrio is a lightweight social availability layer: friends can say “I’m free”, open a temporary room around an activity, and respond with “Yeb!”. Success means the app helps friends make a real plan quickly, then gets out of the way.
+Roomhop is a lightweight social availability layer: friends can say “I’m free”, open a temporary room around an activity, and respond with “I’m in!”. Success means the app helps friends make a real plan quickly, then gets out of the way.
 
 ## Positioning
 
-Yubrio makes ephemeral availability visible between existing friends without becoming a feed, permanent inbox, event planner, community server, dating app, or nearby-stranger network.
+Roomhop makes ephemeral availability visible between existing friends without becoming a feed, permanent inbox, event planner, community server, dating app, or nearby-stranger network.
 
 ## Operating Context
 
@@ -26,14 +26,14 @@ Mobile-first, usually used in short bursts during the day or before an evening p
 
 - Temporary rooms: activity, time (maximum 24 hours), place/online details, audience, chat, and invite permission.
 - Temporary “I’m free” availability with duration, audience, optional note, and optional messages.
-- Immediate joining with “Yeb!” and “Yeb, but later”.
+- Immediate joining with “I’m in!” and “In, but later”.
 - Reciprocal friendships, private circles, contextual room/availability messaging, and realistic demo seed data.
 - Supabase Auth/Postgres/Realtime are the target backend. Demo-first local state is the fallback when credentials are absent.
 - No public discovery, permanent rooms, follower model, streaks, popularity counts, or infinite feed.
 
 ## Brand Commitments
 
-The name is Yubrio. The signature positive response is “Yeb!” (ending in B). Brand behavior is calm by default and vibrant when friends become available or participate. Personality is friendly, tactile, expressive, and concise without becoming childish.
+The name is Roomhop. The positive response is “I’m in!” in English and “Dabei!” in German. Brand behavior is calm by default and vibrant when friends become available or participate. Personality is friendly, tactile, expressive, and concise without becoming childish.
 
 ## Evidence on Hand
 

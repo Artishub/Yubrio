@@ -27,7 +27,7 @@ import { formatAvailabilityTime, isAvailabilityUpcoming } from '@/lib/validation
 import { getPushPermissionStatus, registerForPushNotificationsAsync } from '@/lib/notifications/register';
 import { persistPushToken } from '@/lib/supabase/repositories';
 
-const notificationPreferencesKey = '@yubrio/notification-preferences';
+const notificationPreferencesKey = '@roomhop/notification-preferences';
 type NotificationPreferences = { availability: boolean; rooms: boolean; chat: boolean };
 type PushPermissionStatus = 'granted' | 'denied' | 'undetermined' | 'needs_setup' | 'unavailable' | 'unknown';
 const defaultNotificationPreferences: NotificationPreferences = { availability: true, rooms: true, chat: true };
@@ -130,7 +130,7 @@ export default function YouScreen() {
           status === 'denied'
             ? 'Notifications are off. Allow them in iPhone Settings, then try again.'
             : status === 'needs_setup'
-              ? 'Install the Yubrio development build on your iPhone first.'
+              ? 'Install the Roomhop development build on your iPhone first.'
               : 'Push alerts are only available on a physical phone.',
         );
         return;
@@ -779,7 +779,7 @@ function NotificationPreferencesModal({
       : pushStatus === 'denied'
         ? 'Notifications are off'
         : pushStatus === 'needs_setup'
-          ? 'Install the Yubrio development build first'
+          ? 'Install the Roomhop development build first'
           : pushStatus === 'unavailable'
             ? 'Use a physical phone to enable'
             : 'Get a nudge when plans move';

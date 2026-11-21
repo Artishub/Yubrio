@@ -50,7 +50,7 @@ export default function AddFriendScreen() {
   const profile = remoteProfile.data ? mapRemoteProfile(remoteProfile.data) : demoProfile;
   const alreadyConnected = profile ? connectedPeople.some((item) => item.id === profile.id) : false;
   const isSelf = profile?.id === me.id;
-  const name = profile?.name ?? (handle ? handle.charAt(0).toUpperCase() + handle.slice(1) : 'Yubrio friend');
+  const name = profile?.name ?? (handle ? handle.charAt(0).toUpperCase() + handle.slice(1) : 'Roomhop friend');
   const add = async () => {
     setError('');
     if (!demoMode && !session) {
@@ -112,8 +112,8 @@ export default function AddFriendScreen() {
             invalid
               ? 'Ask your friend to share a new one.'
               : isSelf
-                ? 'Share it with a friend to connect on Yubrio.'
-                : 'Yubrio keeps plans between people who choose each other.',
+                ? 'Share it with a friend to connect on Roomhop.'
+                : 'Roomhop keeps plans between people who choose each other.',
           )}
         </YText>
         {!invalid && (

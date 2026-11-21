@@ -45,7 +45,7 @@ export const rooms: Room[] = [
     endAt: demoNow + 1000 * 60 * 60 * 6,
     people: ['jonas'],
     count: 1,
-    online: 'League of Legends · ARAM · discord.gg/yubrio-demo',
+    online: 'League of Legends · ARAM · discord.gg/roomhop-demo',
     creatorId: 'jonas',
     chatEnabled: true,
     participantsCanInvite: true,
@@ -97,7 +97,7 @@ export const availability: Availability[] = [
 
 // In demo mode a friend reacts after this delay, so the flows can be felt without a backend.
 export const demoReplyDelayMs = 3500;
-export const demoQuickReply = 'Yeb! Give me ten minutes.';
+export const demoQuickReply = 'I’m in! Give me ten minutes.';
 
 export const roomMessages: Record<string, { author: string; body: string }[]> = {
   drinks: [

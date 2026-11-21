@@ -35,15 +35,13 @@ export async function ensureProfile(user: User) {
     .maybeSingle();
   if (existingError) throw existingError;
   if (existing) return;
-  const displayName = user.user_metadata?.display_name?.trim() || user.email?.split('@')[0] || 'Yubrio friend';
-  const { error } = await supabase
-    .from('profiles')
-    .insert({
-      id: user.id,
-      display_name: displayName,
-      initials: displayName.slice(0, 1).toUpperCase(),
-      avatar_color: '#D9F96B',
-    });
+  const displayName = user.user_metadata?.display_name?.trim() || user.email?.split('@')[0] || 'Roomhop friend';
+  const { error } = await supabase.from('profiles').insert({
+    id: user.id,
+    display_name: displayName,
+    initials: displayName.slice(0, 1).toUpperCase(),
+    avatar_color: '#D9F96B',
+  });
   if (error && error.code !== '23505') throw error;
 }
 

@@ -38,7 +38,7 @@ export function AuthScreen() {
       <View style={styles.mark}>
         <Ionicons name="sparkles" size={21} color={colors.brandInk} />
       </View>
-      <YText style={styles.wordmark}>Yubrio</YText>
+      <YText style={styles.wordmark}>Roomhop</YText>
       {sent ? (
         <View style={styles.center}>
           <View style={styles.sentIcon}>

@@ -250,7 +250,7 @@ export default function HomeScreen() {
                       room={room}
                       people={members}
                       onOpen={() => openRoom(room.id)}
-                      onYeb={() => void joinRoomFromHome(room.id)}
+                      onJoin={() => void joinRoomFromHome(room.id)}
                     />
                   </StretchOnScroll>
                 );

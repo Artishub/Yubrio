@@ -14,7 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { ActivityIcon, Avatar, YText } from '@/components/ui';
-import { YebBurst } from '@/components/yeb-burst';
+import { JoinBurst } from '@/components/join-burst';
 import { Colors, display, radius, spacing, sticker } from '@/design/tokens';
 import { useTheme, useThemedStyles } from '@/design/theme';
 import { copy } from '@/design/copy';
@@ -22,22 +22,22 @@ import { useT } from '@/design/i18n';
 import { Person, Room } from '@/types';
 import { displayTitle } from '@/utils/display-name';
 
-// How far a row must be dragged right to count as Yeb, and how far it can travel.
-const swipeYebAt = 72;
+// How far a row must be dragged right to count as joining, and how far it can travel.
+const swipeJoinAt = 72;
 const swipeMax = 104;
 
-// One room in the home list: what, when, where, who is in, and a Yeb button.
-// Dragging the row to the right is a second way to Yeb; the button always stays.
+// One room in the home list: what, when, where, who is in, and a join button.
+// Dragging the row to the right is a second way to join; the button always stays.
 export function RoomRow({
   room,
   people,
   onOpen,
-  onYeb,
+  onJoin,
 }: {
   room: Room;
   people: Person[];
   onOpen: () => void;
-  onYeb: () => void;
+  onJoin: () => void;
 }) {
   const { colors, activityMeta } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -64,10 +64,10 @@ export function RoomRow({
     .failOffsetX(-12)
     .failOffsetY([-12, 12])
     .onUpdate((event) => {
-      // Past the Yeb point the row resists, so it feels like it catches.
+      // Past the join point the row resists, so it feels like it catches.
       const pull = Math.max(0, event.translationX);
-      dragX.value = pull <= swipeYebAt ? pull : Math.min(swipeMax, swipeYebAt + (pull - swipeYebAt) * 0.3);
-      const nowArmed = pull >= swipeYebAt;
+      dragX.value = pull <= swipeJoinAt ? pull : Math.min(swipeMax, swipeJoinAt + (pull - swipeJoinAt) * 0.3);
+      const nowArmed = pull >= swipeJoinAt;
       if (nowArmed !== armed.value) {
         armed.value = nowArmed;
         if (nowArmed) runOnJS(tick)();
@@ -76,12 +76,12 @@ export function RoomRow({
     .onEnd(() => {
       justSwiped.value = 1;
       justSwiped.value = withDelay(400, withTiming(0, { duration: 0 }));
-      if (armed.value) runOnJS(onYeb)();
+      if (armed.value) runOnJS(onJoin)();
       armed.value = false;
       dragX.value = withSpring(0, { damping: 18, stiffness: 220 });
     });
   const cardStyle = useAnimatedStyle(() => ({ transform: [{ translateX: dragX.value }] }));
-  const revealStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, dragX.value / swipeYebAt) }));
+  const revealStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, dragX.value / swipeJoinAt) }));
   const countLabel = room.count === 1 ? copy.home.onePersonIn : `${room.count} ${copy.home.peopleIn}`;
 
   return (
@@ -114,7 +114,7 @@ export function RoomRow({
                   </View>
                 )}
                 <YText style={styles.time} numberOfLines={1}>
-                  {t(room.time)}
+                  {t(happening ? room.time.replace(/^Today · /, '') : room.time)}
                 </YText>
               </View>
               <View style={styles.line}>
@@ -142,18 +142,18 @@ export function RoomRow({
             ) : (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t(`Yeb, join ${title}`)}
+                accessibilityLabel={t(`Join ${title}`)}
                 onPress={() => {
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  onYeb();
+                  onJoin();
                 }}
-                style={({ pressed }) => [styles.yeb, pressed && styles.yebPressed]}
+                style={({ pressed }) => [styles.join, pressed && styles.joinPressed]}
               >
                 <Ionicons name="flash" size={15} color={colors.brandInk} />
-                <YText style={styles.yebText}>{t(copy.room.join)}</YText>
+                <YText style={styles.joinText}>{t(copy.room.join)}</YText>
               </Pressable>
             )}
-            <YebBurst active={Boolean(room.joined)} />
+            <JoinBurst active={Boolean(room.joined)} />
           </View>
         </Animated.View>
       </GestureDetector>
@@ -201,7 +201,7 @@ const makeStyles = (colors: Colors) =>
     overlap: { marginLeft: -7 },
     count: { fontSize: 12, fontWeight: '700', color: colors.onColor, marginLeft: 8 },
     action: { alignSelf: 'center' },
-    yeb: {
+    join: {
       minHeight: 46,
       paddingHorizontal: spacing.md,
       borderRadius: radius.button,
@@ -210,8 +210,8 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       gap: 5,
     },
-    yebPressed: { transform: [{ scale: 0.94 }] },
-    yebText: { ...display, fontSize: 17, color: colors.brandInk },
+    joinPressed: { transform: [{ scale: 0.94 }] },
+    joinText: { ...display, fontSize: 17, color: colors.brandInk },
     joined: { minHeight: 44, paddingHorizontal: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: 4 },
     joinedText: { ...display, fontSize: 15, color: colors.onColor },
   });

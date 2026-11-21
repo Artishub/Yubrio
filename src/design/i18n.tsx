@@ -4,7 +4,7 @@ import { german } from '@/design/de';
 
 export type Language = 'de' | 'en';
 export type Translate = (text: string) => string;
-const languageKey = 'yubrio.language';
+const languageKey = 'roomhop.language';
 
 // The code is written in English. `t('Open a room')` returns the text for the chosen language:
 // English as written, or the German from `src/design/de`. German entries are either an exact

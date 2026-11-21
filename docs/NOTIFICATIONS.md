@@ -4,7 +4,7 @@ Push is selective and deep-links to the relevant context.
 
 There is no separate in-app Activity tab; Home shows the current rooms and free friends directly. An in-app list of past signals can return once push notifications exist.
 
-Examples: “Max is free for the next 3h.”, “Coffee in 20?”, “Sarah opened a room.”, “Jonas said Yeb!”, “Plans changed.”, “Drinks moved to 18:30.”
+Examples: “Max is free for the next 3h.”, “Coffee in 20?”, “Sarah opened a room.”, “Jonas is in.”, “Plans changed.”, “Drinks moved to 18:30.”
 
 Do not notify on every passive state change or create engagement pressure. Store push tokens per device, group or coalesce updates where possible, and add user controls before broadening notification volume.
 

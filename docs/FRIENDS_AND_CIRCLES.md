@@ -10,7 +10,7 @@ Circles are private organizational lists such as Close Friends, Gaming, Work, Un
 
 ## Invitations
 
-The room creator controls “Participants can invite others”. When on, participants may invite their own accepted Yubrio friends; when off, only the creator can invite. There is no automatic public exposure.
+The room creator controls “Participants can invite others”. When on, participants may invite their own accepted Roomhop friends; when off, only the creator can invite. There is no automatic public exposure.
 
 ## Privacy
 

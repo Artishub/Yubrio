@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIcon, ActionButton, Avatar, PersonRow, YText, YebButton } from '@/components/ui';
+import { ActivityIcon, ActionButton, Avatar, PersonRow, YText, JoinButton } from '@/components/ui';
 import { ActivityType, isActivityType, radius, spacing, type, Colors, display, sticker } from '@/design/tokens';
 import { Backdrop } from '@/components/backdrop';
 import { useTheme, useThemedStyles } from '@/design/theme';
@@ -27,7 +27,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { displayName, displayTitle } from '@/utils/display-name';
 import { filterInvitableFriendIds, findLink, halfHourSlots } from '@/lib/validation/rules';
 import * as Linking from 'expo-linking';
-import { YebBurst } from '@/components/yeb-burst';
+import { JoinBurst } from '@/components/join-burst';
 import * as Haptics from 'expo-haptics';
 
 export default function RoomScreen() {
@@ -544,7 +544,7 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
           <View style={styles.actionArea}>
             {isJoined ? (
               <>
-                <YebButton joined onPress={() => undefined} />
+                <JoinButton joined onPress={() => undefined} />
                 <Pressable
                   accessibilityRole="button"
                   disabled={membershipPending}
@@ -560,14 +560,14 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
               </>
             ) : (
               <>
-                <YebButton
+                <JoinButton
                   onPress={() => {
                     if (!membershipPending) void updateMembership();
                   }}
                 />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={t('Yeb, but later')}
+                  accessibilityLabel={t('In, but later')}
                   disabled={membershipPending}
                   onPress={() => {
                     tactilePress();
@@ -579,13 +579,13 @@ function RoomContent({ room, archived }: { room: Room; archived: boolean }) {
                     membershipPending && styles.disabledAction,
                   ]}
                 >
-                  <YText style={styles.laterText}>{t('Yeb, but later')}</YText>
+                  <YText style={styles.laterText}>{t('In, but later')}</YText>
                   <Ionicons name="time-outline" size={17} color={colors.ink} />
                 </Pressable>
               </>
             )}
             <View pointerEvents="none" style={styles.burstAnchor}>
-              <YebBurst active={isJoined} playOnMount={fresh === '1'} />
+              <JoinBurst active={isJoined} playOnMount={fresh === '1'} />
             </View>
           </View>
         )}
@@ -708,7 +708,7 @@ function InviteModal({
               <Ionicons name="close" size={22} color={colors.ink} />
             </Pressable>
           </View>
-          <YText style={styles.inviteHelper}>{t('Only your accepted Yubrio friends can receive this invite.')}</YText>
+          <YText style={styles.inviteHelper}>{t('Only your accepted Roomhop friends can receive this invite.')}</YText>
           <ScrollView
             style={styles.inviteScroll}
             contentContainerStyle={[styles.inviteList, !people.length && styles.inviteListEmpty]}

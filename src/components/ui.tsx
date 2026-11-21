@@ -259,7 +259,7 @@ export function AvailabilityCard({
     </Animated.View>
   );
 }
-export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () => void }) {
+export function JoinButton({ joined, onPress }: { joined?: boolean; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const t = useT();
@@ -269,7 +269,7 @@ export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () =
   const content = (
     <>
       <Ionicons name={joined ? 'checkmark' : 'flash'} size={19} color={colors.brandInk} />
-      <YText style={[styles.yebLabel, joined && styles.yebJoinedLabel]}>
+      <YText style={[styles.joinLabel, joined && styles.joinJoinedLabel]}>
         {t(joined ? copy.room.joined : copy.room.join)}
       </YText>
     </>
@@ -277,13 +277,13 @@ export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () =
   return (
     <Animated.View style={animatedStyle}>
       {joined ? (
-        <View accessible accessibilityLabel={t(copy.room.joined)} style={[styles.yebButton, styles.yebJoined]}>
+        <View accessible accessibilityLabel={t(copy.room.joined)} style={[styles.joinButton, styles.joinJoined]}>
           {content}
         </View>
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('Yeb, join room')}
+          accessibilityLabel={t('Join room')}
           onPress={() => {
             if (!reducedMotion)
               scale.set(
@@ -294,7 +294,7 @@ export function YebButton({ joined, onPress }: { joined?: boolean; onPress: () =
             if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             onPress();
           }}
-          style={({ pressed }) => [styles.yebButton, pressed && styles.yebButtonPressed]}
+          style={({ pressed }) => [styles.joinButton, pressed && styles.joinButtonPressed]}
         >
           {content}
         </Pressable>
@@ -437,7 +437,7 @@ const makeStyles = (colors: Colors) =>
     roomMomentPeopleCopy: { marginLeft: 8, minWidth: 0 },
     roomMomentPeopleNames: { color: colors.ink, fontSize: 11, fontWeight: '800' },
     roomMomentLocation: { flex: 1, fontSize: 13, fontWeight: '800' },
-    yebButton: {
+    joinButton: {
       height: 56,
       borderRadius: radius.button,
       paddingHorizontal: 23,
@@ -448,8 +448,11 @@ const makeStyles = (colors: Colors) =>
       gap: 8,
       ...sticker(colors),
     },
-    yebButtonPressed: { transform: [{ translateX: 4 }, { translateY: 4 }], boxShadow: `0px 0px 0px ${colors.outline}` },
-    yebJoined: { backgroundColor: colors.brand },
-    yebLabel: { ...display, fontSize: 20, color: colors.brandInk },
-    yebJoinedLabel: { color: colors.brandInk },
+    joinButtonPressed: {
+      transform: [{ translateX: 4 }, { translateY: 4 }],
+      boxShadow: `0px 0px 0px ${colors.outline}`,
+    },
+    joinJoined: { backgroundColor: colors.brand },
+    joinLabel: { ...display, fontSize: 20, color: colors.brandInk },
+    joinJoinedLabel: { color: colors.brandInk },
   });

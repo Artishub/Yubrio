@@ -23,7 +23,7 @@ export const room: German = {
     Open: 'Öffnen',
     'Updating…': 'Moment …',
     'Leave room': 'Raum verlassen',
-    'Yeb, but later': 'Yeb, aber später',
+    'In, but later': 'Dabei, aber später',
     'Couldn’t join that room. Try again.': 'Beitreten hat nicht geklappt. Versuch es nochmal.',
     'Couldn’t leave that room. Try again.': 'Verlassen hat nicht geklappt. Versuch es nochmal.',
     People: 'Leute',
@@ -59,8 +59,8 @@ export const room: German = {
     'BRING THEM ALONG': 'NIMM SIE MIT',
     'Who should we invite?': 'Wen laden wir ein?',
     'Close invite friends': 'Einladen schließen',
-    'Only your accepted Yubrio friends can receive this invite.':
-      'Nur deine bestätigten Yubrio-Freunde können diese Einladung bekommen.',
+    'Only your accepted Roomhop friends can receive this invite.':
+      'Nur deine bestätigten Roomhop-Freunde können diese Einladung bekommen.',
     'No friends left to invite': 'Keine weiteren Freunde zum Einladen',
     'Everyone’s already in.': 'Alle sind schon dabei.',
     'There are no other friends to invite right now.': 'Gerade gibt es sonst niemanden zum Einladen.',

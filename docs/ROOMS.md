@@ -8,17 +8,17 @@ One sheet. What (activity and optional name) and When (start as “Now” or a h
 
 ## Detail
 
-Show activity icon/title, scheduled time or remaining time, location/connection, then People, Suggestions and Chat. Once the viewer has joined, Chat moves above People because it is what they use. Primary state is “Yeb!”; joined state is “You’re in.” Creator appears as “Created room”, not host/admin/owner.
+Show activity icon/title, scheduled time or remaining time, location/connection, then People, Suggestions and Chat. Once the viewer has joined, Chat moves above People because it is what they use. Primary state is “I’m in!”; joined state is “You’re in.” Creator appears as “Created room”, not host/admin/owner.
 
 Gaming stays an activity type. For online gaming rooms, creation can optionally capture a game, mode, and flexible join details such as a username, Discord, server, or link. These are displayed as compact connection details rather than creating permanent game communities. A link in the details gets an Open button once the viewer has joined. A gaming room without a name is titled after its game.
 
 ## Joining later
 
-“Yeb, but later” supports 30 min, 1 hour, or custom arrival. Show arrival timing in the participant list; joining remains immediate.
+“In, but later” supports 30 min, 1 hour, or custom arrival. Show arrival timing in the participant list; joining remains immediate.
 
 ## Inviting
 
-When the creator enables participant invites, joined participants see an Invite action and can invite only their accepted Yubrio friends. Invites are private and never expose a room publicly.
+When the creator enables participant invites, joined participants see an Invite action and can invite only their accepted Roomhop friends. Invites are private and never expose a room publicly.
 
 An invited friend can see that room even when they were not part of its original audience. That access is limited to the room and its short two-hour archive window; joining still requires the normal room membership policy.
 

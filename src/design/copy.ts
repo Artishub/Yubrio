@@ -25,7 +25,7 @@ export const copy = {
     quietCopy: 'You could change that.',
     openRoom: 'Open a room',
   },
-  room: { joined: 'You’re in', join: 'Yeb!', later: 'Yeb, but later', chat: 'Temporary Chat', people: 'People' },
+  room: { joined: 'You’re in', join: 'I’m in!', later: 'In, but later', chat: 'Temporary Chat', people: 'People' },
   availability: { title: 'How long are you around?', note: 'Up for anything.' },
   friends: {
     emptyTitle: 'Invite your friends',

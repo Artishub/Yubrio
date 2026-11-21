@@ -56,7 +56,7 @@ export const sheets: German = {
     'Add a friend first, then you can choose them here.': 'Füge erst Freunde hinzu, dann kannst du sie hier wählen.',
     'Pick one or more circles.': 'Wähle einen oder mehrere Kreise.',
     Circle: 'Kreis',
-    'Online · Join after Yeb': 'Online · Link nach dem Yeb',
+    'Online · Link after you join': 'Online · Link nach dem Beitreten',
     '1 friend': '1 Freund',
   },
   patterns: [

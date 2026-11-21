@@ -24,7 +24,7 @@ export async function registerForPushNotificationsAsync(options: { requestPermis
   const notifications = await import('expo-notifications');
   if (Platform.OS === 'android')
     await notifications.setNotificationChannelAsync('default', {
-      name: 'Yubrio',
+      name: 'Roomhop',
       importance: notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 180],
       lightColor: '#D9F96B',

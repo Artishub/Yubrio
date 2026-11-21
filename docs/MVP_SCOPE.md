@@ -2,7 +2,7 @@
 
 ## P0
 
-Home, open room, room detail, Yeb, Yeb later, I’m free, audience selection, friends, circles, room participants, room chat, temporary availability messaging, polished motion, accessibility, and demo mode.
+Home, open room, room detail, I’m in, In but later, I’m free, audience selection, friends, circles, room participants, room chat, temporary availability messaging, polished motion, accessibility, and demo mode.
 
 ## P1
 

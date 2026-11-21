@@ -10,7 +10,7 @@ Home → Open in the tab bar → activity → time + duration → In person / On
 
 ## Join a room
 
-Home → room row → room detail → Yeb! or Yeb, but later → participant list → optional temporary chat. Yeb also works directly on the row. Joined state says “You’re in.”
+Home → room row → room detail → “I’m in!” or “In, but later” → participant list → optional temporary chat. Joining also works directly on the row. Joined state says “You’re in.”
 
 ## Availability
 

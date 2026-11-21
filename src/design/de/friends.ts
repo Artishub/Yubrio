@@ -18,7 +18,7 @@ export const friends: German = {
     'Friend requests': 'Freundschaftsanfragen',
     'All friends': 'Alle Freunde',
     'Online now': 'Gerade online',
-    'Yubrio friend': 'Auf Yubrio',
+    'Roomhop friend': 'Auf Roomhop',
     'Invite your friends': 'Lad deine Freunde ein',
     'Share your link and make the first spark.': 'Teil deinen Link und bring den Stein ins Rollen.',
     'Show my link': 'Meinen Link zeigen',
@@ -32,7 +32,7 @@ export const friends: German = {
     'Just a second.': 'Einen Moment.',
     'Your link couldn’t load.': 'Dein Link konnte nicht geladen werden.',
     'Try again before sharing it.': 'Versuch es nochmal, bevor du ihn teilst.',
-    'Your Yubrio friend QR code': 'Dein Yubrio-QR-Code für Freunde',
+    'Your Roomhop friend QR code': 'Dein Roomhop-QR-Code für Freunde',
     'Your link only connects people who choose to add each other.':
       'Dein Link verbindet nur Leute, die sich gegenseitig hinzufügen wollen.',
     'Scan a friend’s QR': 'QR-Code scannen',
@@ -41,14 +41,14 @@ export const friends: German = {
     // QR scanner
     'Scan their code.': 'Scann den Code.',
     'Close scanner': 'Scanner schließen',
-    'Open Yubrio on your phone to scan a friend’s QR code.':
-      'Öffne Yubrio auf deinem Handy, um den QR-Code deiner Freunde zu scannen.',
+    'Open Roomhop on your phone to scan a friend’s QR code.':
+      'Öffne Roomhop auf deinem Handy, um den QR-Code deiner Freunde zu scannen.',
     'Checking camera access…': 'Kamerazugriff wird geprüft…',
-    'Yubrio needs camera access to scan friend links.':
-      'Yubrio braucht Zugriff auf die Kamera, um Freundeslinks zu scannen.',
+    'Roomhop needs camera access to scan friend links.':
+      'Roomhop braucht Zugriff auf die Kamera, um Freundeslinks zu scannen.',
     'Allow camera': 'Kamera erlauben',
-    'That code isn’t a Yubrio friend link.': 'Das ist kein Yubrio-Freundeslink.',
-    'Only Yubrio friend links can be scanned here.': 'Hier lassen sich nur Yubrio-Freundeslinks scannen.',
+    'That code isn’t a Roomhop friend link.': 'Das ist kein Roomhop-Freundeslink.',
+    'Only Roomhop friend links can be scanned here.': 'Hier lassen sich nur Roomhop-Freundeslinks scannen.',
 
     // Create circle sheet
     'PRIVATE CIRCLE': 'PRIVATER KREIS',
@@ -63,9 +63,9 @@ export const friends: German = {
     'This link has gone quiet.': 'Dieser Link ist nicht mehr aktiv.',
     'That’s your link.': 'Das ist dein Link.',
     'Ask your friend to share a new one.': 'Lass dir einfach einen neuen schicken.',
-    'Share it with a friend to connect on Yubrio.': 'Teil ihn mit Freunden, um euch auf Yubrio zu verbinden.',
-    'Yubrio keeps plans between people who choose each other.':
-      'Auf Yubrio bleiben Pläne unter Leuten, die sich gegenseitig ausgesucht haben.',
+    'Share it with a friend to connect on Roomhop.': 'Teil ihn mit Freunden, um euch auf Roomhop zu verbinden.',
+    'Roomhop keeps plans between people who choose each other.':
+      'Auf Roomhop bleiben Pläne unter Leuten, die sich gegenseitig ausgesucht haben.',
     'This is your own friend link': 'Das ist dein eigener Freundeslink',
     'Already in your people': 'Schon bei deinen Leuten',
     'Friend request sent': 'Freundschaftsanfrage gesendet',
@@ -97,16 +97,16 @@ export const friends: German = {
     'Couldn’t finish signing in.': 'Die Anmeldung hat nicht geklappt.',
     'This sign-in link could not be completed. Request a new one.':
       'Dieser Anmeldelink hat nicht funktioniert. Fordere einen neuen an.',
-    'Back to Yubrio': 'Zurück zu Yubrio',
+    'Back to Roomhop': 'Zurück zu Roomhop',
   },
   patterns: [
-    [/^1 friends on Yubrio$/, '1 Freund auf Yubrio'],
-    [/^(\d+) friends on Yubrio$/, '$1 Freunde auf Yubrio'],
+    [/^1 friends on Roomhop$/, '1 Freund auf Roomhop'],
+    [/^(\d+) friends on Roomhop$/, '$1 Freunde auf Roomhop'],
     [/^(\d+) friend$/, '$1 Freund'],
     [/^(\d+) friends$/, '$1 Freunde'],
     [/^Add people · (\d+) selected$/, 'Leute hinzufügen · $1 ausgewählt'],
     [/^SCAN TO ADD (.+)$/, 'SCANNEN, UM $1 HINZUZUFÜGEN'],
-    [/^Add me on Yubrio: (.+)$/, 'Füg mich auf Yubrio hinzu: $1'],
+    [/^Add me on Roomhop: (.+)$/, 'Füg mich auf Roomhop hinzu: $1'],
     [/^Your sign-in link is on its way to (.+)\.$/, 'Dein Anmeldelink ist unterwegs an $1.'],
     [/^Meet (.+)\.$/, 'Das ist $1.'],
     // A person's name follows; keep these last so the more specific "Add …" patterns win.

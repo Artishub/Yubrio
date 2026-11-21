@@ -54,7 +54,7 @@ export default function AuthCallback() {
         <YText style={type.section}>{t('Couldn’t finish signing in.')}</YText>
         <YText style={styles.error}>{t(error)}</YText>
         <Pressable accessibilityRole="button" onPress={() => router.replace('/')}>
-          <YText style={styles.back}>{t('Back to Yubrio')}</YText>
+          <YText style={styles.back}>{t('Back to Roomhop')}</YText>
         </Pressable>
       </View>
     );
